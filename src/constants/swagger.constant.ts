@@ -9,8 +9,8 @@ export const SWAGGER_DESCRIPTION = `<table border="0">
     <td>
       <h3>Giới thiệu</h3>
       <ul>
-        <li>Đây là API cho <code>${process.env.NAME_SERVICE || 'ToeicHUST'}</code></li>
-        <li><a href="https://github.com/${process.env.NAME_SERVICE || 'ToeicHUST'}">Xem thông tin github</a></li>
+        <li>Đây là API cho <code>${process.env.NAME_SERVICE || '20206205Tech'}</code></li>
+        <li><a href="https://github.com/${process.env.NAME_SERVICE || '20206205Tech'}">Xem thông tin github</a></li>
       </ul>
       <h3>JSON và YAML docs:</h3>
       <ul>
@@ -19,7 +19,7 @@ export const SWAGGER_DESCRIPTION = `<table border="0">
       </ul>
     </td>
     <td valign="top">
-      <img src="${SWAGGER_CUSTOM_FAVICON}" alt="toeicHUST" width="200"/>
+      <img src="${SWAGGER_CUSTOM_FAVICON}" alt="20206205Tech" width="200"/>
     </td>
   </tr>
 </table>`;
