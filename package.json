@@ -20,9 +20,10 @@
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs -d ./data-source.ts",
     "migration:generate": "npm run typeorm migration:generate",
-    "migration:run": "npm run typeorm migration:run",
     "migration:drop": "npm run typeorm schema:drop",
     "migration:revert": "npm run typeorm migration:revert",
+    "migration:show": "npm run typeorm migration:show",
+    "migration:run": "npm run typeorm migration:run",
     "prepare": "husky"
   },
   "dependencies": {
