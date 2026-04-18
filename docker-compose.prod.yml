@@ -1,0 +1,8 @@
+services:
+  service:
+    extends:
+      file: docker-compose.base.yml
+      service: service
+    build:
+      context: '.'
+      dockerfile: './Dockerfile.prod'
