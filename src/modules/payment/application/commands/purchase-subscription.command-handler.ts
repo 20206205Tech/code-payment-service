@@ -91,10 +91,31 @@ export class PurchaseSubscriptionCommandHandler implements ICommandHandler<Purch
     );
     await this.transactionRepository.save(transaction);
 
-    // Thêm job timeout vào queue
-    const timeoutMs =
-      this.configService.getOrThrow<number>('PAYMENT_TIMEOUT_MS') ||
-      5 * 60 * 1000; // Mặc định 15 phút
+    // Thêm Number() để ép kiểu chuỗi "600000" thành số 600000 lúc chạy thực tế
+    const timeoutMs = Number(
+      this.configService.getOrThrow('PAYMENT_TIMEOUT_MS'),
+    );
+
+    console.log(
+      '🚀 ~ PurchaseSubscriptionCommandHandler ~ execute ~ timeoutMs:',
+      timeoutMs,
+      'Type:',
+      typeof timeoutMs, // Nên in ra 'number'
+    );
+
+    // await this.paymentQueue.add(
+    //   PAYMENT_TIMEOUT_JOB,
+    //   { transactionId: transaction.transactionId.value },
+    //   { delay: timeoutMs },
+    // );
+
+    // // Thêm job timeout vào queue
+    // const timeoutMs =
+    //   this.configService.getOrThrow<number>('PAYMENT_TIMEOUT_MS');
+    // console.log(
+    //   '🚀 ~ PurchaseSubscriptionCommandHandler ~ execute ~ timeoutMs:',
+    //   timeoutMs,
+    // );
     await this.paymentQueue.add(
       PAYMENT_TIMEOUT_JOB,
       { transactionId: transaction.transactionId.value },
