@@ -1,8 +1,8 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
-import { BullModule } from '@nestjs/bullmq';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { LoggerModule } from './modules/logger/logger.module';
@@ -18,7 +18,7 @@ import { PaymentModule } from './modules/payment/payment.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connection: {
-          url: configService.get<string>('REDIS_URL'),
+          url: configService.getOrThrow<string>('REDIS_URL'),
         },
       }),
     }),
@@ -28,16 +28,19 @@ import { PaymentModule } from './modules/payment/payment.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        url: configService.get<string>(
+        url: configService.getOrThrow<string>(
           'MICROSERVICE_PAYMENT_SERVICE_DATABASE_URL',
         ),
         autoLoadEntities: true,
         synchronize: false,
-        logging: configService.get<string>('NODE_ENV') === 'development',
-        ssl: configService.get<string>('NODE_ENV') === 'test' ? false : true,
+        logging: configService.getOrThrow<string>('NODE_ENV') === 'development',
+        ssl:
+          configService.getOrThrow<string>('NODE_ENV') === 'test'
+            ? false
+            : true,
         extra: {
           ssl:
-            configService.get<string>('NODE_ENV') === 'test'
+            configService.getOrThrow<string>('NODE_ENV') === 'test'
               ? false
               : { rejectUnauthorized: false }, // Cho phép chứng chỉ tự ký (self-signed)
           max: 1, // Giới hạn tối đa 1 connection trong pool (Hữu ích khi chạy serverless để tránh cạn kiệt connection)

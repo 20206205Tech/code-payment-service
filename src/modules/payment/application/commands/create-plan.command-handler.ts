@@ -23,7 +23,6 @@ export class CreatePlanCommandHandler extends BaseCommandHandler<
 
   async execute(command: CreatePlanCommand): Promise<Plan> {
     const price = new Money(command.price);
-    // 🟢 Khởi tạo Plan thuần túy
     const plan = Plan.create(
       command.name,
       command.durationMonths,
@@ -31,7 +30,6 @@ export class CreatePlanCommandHandler extends BaseCommandHandler<
       command.isActive,
     );
 
-    // 🟢 Lưu trực tiếp xuống Port
     await this.planRepository.save(plan);
 
     return plan;

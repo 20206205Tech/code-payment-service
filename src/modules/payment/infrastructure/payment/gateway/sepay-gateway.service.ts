@@ -18,15 +18,15 @@ export class SepayGatewayService implements PaymentGatewayPort {
   private ipnUrl: string;
 
   constructor(private configService: ConfigService) {
-    this.merchantId = this.configService.get<string>(
+    this.merchantId = this.configService.getOrThrow<string>(
       'PAYMENT_SEPAY_MERCHANT_ID',
       '',
     );
-    this.secretKey = this.configService.get<string>(
+    this.secretKey = this.configService.getOrThrow<string>(
       'PAYMENT_SEPAY_SECRET_KEY',
       '',
     );
-    this.endpoint = this.configService.get<string>(
+    this.endpoint = this.configService.getOrThrow<string>(
       'PAYMENT_SEPAY_ENDPOINT',
       'https://pay.sepay.vn/v1/checkout/init',
     );

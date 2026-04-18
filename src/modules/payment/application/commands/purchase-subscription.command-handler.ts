@@ -15,6 +15,7 @@ import { Transaction } from '../../domain/entities/transaction';
 import { Money } from '../../domain/value-objects/money';
 import { PlanId } from '../../domain/value-objects/plan-id';
 import { UserId } from '../../domain/value-objects/user-id';
+import { PaymentGatewaySelectorService } from '../../infrastructure/payment/payment-gateway-selector.service';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -32,7 +33,6 @@ import {
   type PaymentGatewayPort,
 } from '../ports/payment/payment-gateway.port';
 import { PurchaseSubscriptionCommand } from './purchase-subscription.command';
-import { PaymentGatewaySelectorService } from '../../infrastructure/payment/payment-gateway-selector.service';
 
 @CommandHandler(PurchaseSubscriptionCommand)
 export class PurchaseSubscriptionCommandHandler implements ICommandHandler<PurchaseSubscriptionCommand> {
@@ -93,7 +93,8 @@ export class PurchaseSubscriptionCommandHandler implements ICommandHandler<Purch
 
     // Thêm job timeout vào queue
     const timeoutMs =
-      this.configService.get<number>('PAYMENT_TIMEOUT_MS') || 1 * 60 * 1000; // Mặc định 15 phút
+      this.configService.getOrThrow<number>('PAYMENT_TIMEOUT_MS') ||
+      5 * 60 * 1000; // Mặc định 15 phút
     await this.paymentQueue.add(
       PAYMENT_TIMEOUT_JOB,
       { transactionId: transaction.transactionId.value },

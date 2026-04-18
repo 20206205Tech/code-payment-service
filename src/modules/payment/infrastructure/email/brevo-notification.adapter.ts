@@ -1,6 +1,6 @@
+import { BrevoClient } from '@getbrevo/brevo';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BrevoClient } from '@getbrevo/brevo';
 import { NotificationPort } from '../../application/ports/service/notification.port';
 
 @Injectable()
@@ -9,16 +9,16 @@ export class BrevoNotificationAdapter implements NotificationPort {
   private client: BrevoClient;
   private readonly senderName: string;
   private readonly senderEmail: string;
+  private readonly emailAddressDev: string;
 
   constructor(private readonly configService: ConfigService) {
     this.client = new BrevoClient({
       apiKey: this.configService.getOrThrow<string>('BREVO_API_KEY'),
     });
-    this.senderName = this.configService.get<string>(
-      'SENDER_NAME',
-      'AI Chatbot',
-    );
-    this.senderEmail = this.configService.getOrThrow<string>('SENDER_EMAIL');
+    this.senderName = this.configService.getOrThrow<string>('EMAIL_NAME');
+    this.senderEmail = this.configService.getOrThrow<string>('EMAIL_ADDRESS');
+    this.emailAddressDev =
+      this.configService.getOrThrow<string>('EMAIL_ADDRESS_DEV');
   }
 
   async sendPaymentSuccessEmail(
@@ -28,6 +28,12 @@ export class BrevoNotificationAdapter implements NotificationPort {
     txnRef: string,
   ): Promise<void> {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        email = this.emailAddressDev || email;
+        this.logger.debug(
+          `Development mode: Overriding recipient email to ${email} for testing purposes.`,
+        );
+      }
       const response = await this.client.transactionalEmails.sendTransacEmail({
         subject: 'Xác nhận thanh toán thành công - AI Chatbot',
         htmlContent: `

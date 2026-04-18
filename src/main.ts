@@ -9,6 +9,7 @@ import { AppModule } from './app.module';
 import { SWAGGER_AUTH_KEY } from './constants/swagger.constant';
 
 async function bootstrap() {
+  const ENVIRONMENT = process.env.ENVIRONMENT ?? 'production';
   const PORT = process.env.PORT ?? 30001;
   const SERVICE_NAME = 'payment-service';
 
@@ -17,6 +18,7 @@ async function bootstrap() {
   const DESCRIPTION = `
 # Chào mừng đến với ${SERVICE_NAME}
 
+* [ENVIRONMENT]: ${ENVIRONMENT}
 * [API Swagger](http://localhost:${PORT}/docs)
 * [Đăng nhập với Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)
 
