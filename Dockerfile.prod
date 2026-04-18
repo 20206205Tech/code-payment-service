@@ -1,0 +1,39 @@
+# Stage 1: Build ứng dụng
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Sao chép file cấu hình package và prisma schema
+COPY package*.json ./
+COPY prisma ./prisma/ 
+
+# Cài đặt dependencies
+RUN npm install --legacy-peer-deps
+
+# Sao chép toàn bộ mã nguồn
+COPY . .
+
+# Quan trọng: Generate Prisma Client cho môi trường Docker
+RUN npx prisma generate
+
+# Build dự án
+RUN npm run build
+
+# Stage 2: Chạy ứng dụng (Production)
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Sao chép các file cần thiết
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+# Sao chép cả folder prisma để có thể chạy migration nếu cần
+COPY --from=builder /app/prisma ./prisma 
+
+EXPOSE 3000
+
+# Lệnh khởi chạy
+CMD ["node", "dist/src/main"]

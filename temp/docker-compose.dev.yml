@@ -1,0 +1,12 @@
+services:
+  service:
+    extends:
+      file: docker-compose.base.yml
+      service: service
+    build:
+      context: '.'
+      dockerfile: './Dockerfile.dev'
+    restart: 'always'
+    volumes:
+      - '.:/app'
+      - '/app/.venv'
