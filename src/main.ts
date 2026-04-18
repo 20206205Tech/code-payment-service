@@ -68,7 +68,6 @@ async function bootstrap() {
   await app.listen(PORT);
 }
 
-// Bắt lỗi cho Promise để tránh lỗi no-floating-promises của ESLint
 bootstrap().catch((err) => {
   console.error('Lỗi khi khởi động ứng dụng:', err);
 });
