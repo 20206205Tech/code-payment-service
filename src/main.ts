@@ -1,8 +1,74 @@
+import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import {
+  DocumentBuilder,
+  SwaggerCustomOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { SWAGGER_AUTH_KEY } from './constants/swagger.constant';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  const PORT = process.env.PORT ?? 30001;
+  const SERVICE_NAME = 'payment-service';
+
+  const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
+
+  const DESCRIPTION = `
+# Chào mừng đến với ${SERVICE_NAME}
+
+* [API Swagger](http://localhost:${PORT}/docs)
+* [Đăng nhập với Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)
+
+  `.trim();
+
+  Logger.debug(`DESCRIPTION: \n${DESCRIPTION}`);
+
+  const app = await NestFactory.create(AppModule, {
+    logger: new ConsoleLogger({
+      prefix: SERVICE_NAME,
+    }),
+  });
+
+  app.setGlobalPrefix('api', {
+    exclude: ['/'],
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Loại bỏ các trường không được định nghĩa trong DTO
+      transform: true, // Tự động convert kiểu dữ liệu (vd: string sang number)
+    }),
+  );
+
+  const configSwagger = new DocumentBuilder()
+    .setTitle(SERVICE_NAME)
+    .setDescription(DESCRIPTION)
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      SWAGGER_AUTH_KEY,
+    )
+    .build();
+
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, configSwagger);
+
+  const customOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  };
+
+  SwaggerModule.setup('docs', app, documentFactory, customOptions);
+
+  await app.listen(PORT);
 }
-bootstrap();
+
+// Bắt lỗi cho Promise để tránh lỗi no-floating-promises của ESLint
+bootstrap().catch((err) => {
+  console.error('Lỗi khi khởi động ứng dụng:', err);
+});
