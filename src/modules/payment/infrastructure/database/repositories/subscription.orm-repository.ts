@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Between, LessThan, Not, Repository } from 'typeorm';
 import { SubscriptionRepositoryPort } from '../../../application/ports/database/subscription.repository.port';
 import { Subscription } from '../../../domain/entities/subscription';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
@@ -48,6 +48,29 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
       sub.status = 'expired';
       await this.repo.save(sub);
     }
+  }
+
+  async findActiveExpiringBefore(date: Date): Promise<Subscription[]> {
+    const orms = await this.repo.find({
+      where: {
+        status: 'active',
+        endDate: LessThan(date),
+      },
+    });
+    return orms.map((orm) => SubscriptionMapper.toDomain(orm));
+  }
+
+  async findActiveExpiringBetween(
+    start: Date,
+    end: Date,
+  ): Promise<Subscription[]> {
+    const orms = await this.repo.find({
+      where: {
+        status: 'active',
+        endDate: Between(start, end),
+      },
+    });
+    return orms.map((orm) => SubscriptionMapper.toDomain(orm));
   }
 
   async save(subscription: Subscription): Promise<void> {

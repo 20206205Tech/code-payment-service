@@ -1,4 +1,0 @@
-services:
-  service:
-    ports:
-      - '30001:30001'
