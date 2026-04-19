@@ -5,6 +5,7 @@ import { PlanId } from '../value-objects/plan-id';
 import { SubscriptionId } from '../value-objects/subscription-id';
 import { UserId } from '../value-objects/user-id';
 import { SubscriptionPurchasedEvent } from '../events/subscription-purchased.event';
+import { SubscriptionExpiredEvent } from '../events/subscription-expired.event';
 
 export type SubscriptionStatus = 'pending' | 'active' | 'expired';
 
@@ -81,6 +82,15 @@ export class Subscription extends AggregateRoot {
   public expire(): void {
     this._status = 'expired';
     this._updatedAt = new Date();
+
+    this.apply(
+      new SubscriptionExpiredEvent(
+        this._subscriptionId.value,
+        this._userId.value,
+        this._planId.value,
+        this._updatedAt,
+      ),
+    );
   }
 
   get subscriptionId(): SubscriptionId {

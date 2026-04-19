@@ -14,6 +14,8 @@ export interface SubscriptionRepositoryPort {
     userId: UserId,
     excludeId: SubscriptionId,
   ): Promise<void>;
+  findActiveExpiringBefore(date: Date): Promise<Subscription[]>;
+  findActiveExpiringBetween(start: Date, end: Date): Promise<Subscription[]>;
   save(subscription: Subscription): Promise<void>;
   delete(id: SubscriptionId): Promise<void>;
 }

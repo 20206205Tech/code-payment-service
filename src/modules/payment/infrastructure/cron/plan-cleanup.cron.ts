@@ -24,7 +24,7 @@ export class PlanCleanupCron {
   // @Cron(CronExpression.EVERY_5_SECONDS) // dùng để test nhanh
   async handleCleanup(): Promise<void> {
     this.logger.log(
-      '🧹 Bắt đầu dọn dẹp các Plan đã archive (isActive = false)...',
+      'Bắt đầu dọn dẹp các Plan đã archive (isActive = false)...',
     );
 
     try {
@@ -37,7 +37,7 @@ export class PlanCleanupCron {
       });
 
       this.logger.log(
-        `✅ Dọn dẹp hoàn tất: Đã xóa ${result.affected ?? 0} plan(s) đã archive quá ${PlanCleanupCron.RETAIN_DAYS} ngày.`,
+        `Dọn dẹp hoàn tất: Đã xóa ${result.affected ?? 0} plan(s) đã archive quá ${PlanCleanupCron.RETAIN_DAYS} ngày.`,
       );
     } catch (error) {
       this.logger.error('❌ Lỗi trong quá trình dọn dẹp Plan:', error);

@@ -1,12 +1,10 @@
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
+import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubscriptionPurchasedEvent } from '../../domain/events/subscription-purchased.event';
-import {
-  USER_PROFILE_PORT,
-  type UserProfilePort,
-} from '../ports/services/user-profile.port';
+import { PlanId } from '../../domain/value-objects/plan-id';
+import { OutboxEntity } from '../../infrastructure/database/entities/outbox.entity';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -16,11 +14,13 @@ import {
   type TransactionRepositoryPort,
 } from '../ports/database/transaction.repository.port';
 import {
-  NOTIFICATION_PORT,
-  type NotificationPort,
-} from '../ports/service/notification.port';
-import { PlanId } from '../../domain/value-objects/plan-id';
-import { OutboxEntity } from '../../infrastructure/database/entities/outbox.entity';
+  EMAIL_SENDER_PORT,
+  type EmailSenderPort,
+} from '../ports/email/email-sender.port';
+import {
+  USER_PROFILE_PORT,
+  type UserProfilePort,
+} from '../ports/services/user-profile.port';
 
 @EventsHandler(SubscriptionPurchasedEvent)
 export class SubscriptionPurchasedEventHandler implements IEventHandler<SubscriptionPurchasedEvent> {
@@ -33,8 +33,8 @@ export class SubscriptionPurchasedEventHandler implements IEventHandler<Subscrip
     private readonly planRepository: PlanRepositoryPort,
     @Inject(TRANSACTION_REPOSITORY_PORT)
     private readonly transactionRepository: TransactionRepositoryPort,
-    @Inject(NOTIFICATION_PORT)
-    private readonly notificationPort: NotificationPort,
+    @Inject(EMAIL_SENDER_PORT)
+    private readonly emailSenderPort: EmailSenderPort,
     @InjectRepository(OutboxEntity)
     private readonly outboxRepo: Repository<OutboxEntity>,
   ) {}
@@ -69,7 +69,7 @@ export class SubscriptionPurchasedEventHandler implements IEventHandler<Subscrip
       const planName = plan ? plan.name : 'Gói dịch vụ';
 
       // 4. Gửi email thông báo
-      await this.notificationPort.sendPaymentSuccessEmail(
+      await this.emailSenderPort.sendPaymentSuccessEmail(
         customerEmail,
         customerName,
         planName,
