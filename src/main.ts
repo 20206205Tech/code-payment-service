@@ -16,11 +16,12 @@ async function bootstrap() {
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
 
   const DESCRIPTION = `
-# Chào mừng đến với ${SERVICE_NAME}
+# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})
 
-* ENVIRONMENT: ${ENVIRONMENT}
-* [API Swagger](http://localhost:${PORT}/docs)
-* [Dev](https://dev-code-${SERVICE_NAME}.20206205.tech/docs)
+* [Local API](http://localhost:${PORT})
+* [Local Swagger](http://localhost:${PORT}/docs)
+* [Dev API](https://dev-code-${SERVICE_NAME}.20206205.tech)
+* [Dev Swagger](https://dev-code-${SERVICE_NAME}.20206205.tech/docs)
 * [Đăng nhập với Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)
 
   `.trim();
@@ -45,7 +46,7 @@ async function bootstrap() {
   );
 
   const configSwagger = new DocumentBuilder()
-    .setTitle(SERVICE_NAME)
+    .setTitle(`${SERVICE_NAME} (${ENVIRONMENT})`)
     .setDescription(DESCRIPTION)
     .addBearerAuth(
       {
