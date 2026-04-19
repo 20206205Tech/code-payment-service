@@ -1,7 +1,7 @@
 services:
-  vps-service:
-    container_name: vps-service
-    image: vps-service:latest
+  payment-service:
+    container_name: payment-service
+    image: payment-service:latest
     ports:
       - "30004:30004"
     env_file:
