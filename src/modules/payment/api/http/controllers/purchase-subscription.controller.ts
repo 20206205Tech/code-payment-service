@@ -32,6 +32,6 @@ export class PurchaseSubscriptionController {
       ),
     );
     const paymentUrl = intermediate as string;
-    return res.send(paymentUrl);
+    return res.send({ payment_url: paymentUrl });
   }
 }

@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { VnpayService as NestjsVnpayService } from 'nestjs-vnpay';
-import { ProductCode, VnpLocale, dateFormat } from 'vnpay';
+import {
+  ProductCode,
+  VnpLocale,
+  dateFormat,
+  ReturnQueryFromVNPay,
+  VerifyReturnUrl,
+} from 'vnpay';
 import {
   IpnVerifyResult,
   PaymentGatewayPort,
@@ -10,6 +16,7 @@ import {
 
 @Injectable()
 export class VnpayGatewayService implements PaymentGatewayPort {
+  private readonly logger = new Logger(VnpayGatewayService.name);
   constructor(
     private readonly vnpay: NestjsVnpayService,
     private readonly configService: ConfigService,
@@ -37,21 +44,78 @@ export class VnpayGatewayService implements PaymentGatewayPort {
     return Promise.resolve(url);
   }
 
-  verifyIpn(data: Record<string, any>): Promise<IpnVerifyResult> {
-    const isSuccess = data.vnp_ResponseCode === '00';
-    // Ép kiểu data về Record<string, string | number> để thỏa mãn type của library nếu cần
+  async verifyIpn(data: Record<string, any>): Promise<IpnVerifyResult> {
+    const vnpQuery = data as ReturnQueryFromVNPay;
+    try {
+      this.logger.debug(
+        'Verifying VNPay IPN/Return with data:',
+        JSON.stringify(data),
+      );
+      // 1. Chỉ lấy các tham số bắt đầu bằng vnp_ và đảm bảo là chuỗi
+      const vnpayData: Record<string, string> = {};
+      Object.keys(data).forEach((key) => {
+        if (key.startsWith('vnp_')) {
+          vnpayData[key] = String(data[key]);
+        }
+      });
+      // 2. Sử dụng thư viện để kiểm tra
+      const verifyResult: VerifyReturnUrl = await this.vnpay.verifyReturnUrl(
+        vnpayData as unknown as ReturnQueryFromVNPay,
+      );
 
-    const intermediate: unknown = this.vnpay.verifyReturnUrl(data as any);
-    const verifyResult = intermediate as { isVerified: boolean };
-
-    return Promise.resolve({
-      isValid: verifyResult.isVerified,
-      isSuccess: isSuccess,
-      txnRef: String(data.vnp_TxnRef ?? ''),
-      providerTransId: String(data.vnp_TransactionNo ?? ''),
-      message: isSuccess
-        ? 'Success'
-        : `VNPay Error: ${data.vnp_ResponseCode as string}`,
-    });
+      this.logger.debug(
+        'VNPay verification result:',
+        JSON.stringify(verifyResult),
+      );
+      const isSuccess =
+        String(vnpQuery.vnp_ResponseCode) === '00' &&
+        String(vnpQuery.vnp_TransactionStatus) === '00';
+      return {
+        isValid: verifyResult.isVerified,
+        isSuccess: isSuccess,
+        txnRef: String(vnpQuery.vnp_TxnRef ?? ''),
+        providerTransId: String(vnpQuery.vnp_TransactionNo ?? ''),
+        message: verifyResult.isVerified
+          ? isSuccess
+            ? 'Success'
+            : `VNPay Error Code: ${String(vnpQuery.vnp_ResponseCode)}`
+          : verifyResult.message || 'Chữ ký không hợp lệ',
+      };
+    } catch (error) {
+      this.logger.error('VNPay verification error:', error);
+      return {
+        isValid: false,
+        isSuccess: false,
+        txnRef: String(vnpQuery.vnp_TxnRef ?? ''),
+        providerTransId: String(vnpQuery.vnp_TransactionNo ?? ''),
+        message:
+          error instanceof Error ? error.message : 'Lỗi xác thực chữ ký VNPay',
+      };
+    }
   }
+
+  //   verifyIpn(data: Record<string, any>): Promise<IpnVerifyResult> {
+  //   // 1. Chuyển đổi các giá trị query string về đúng kiểu dữ liệu
+  //   const vnpayData = {
+  //     ...data,
+  //     vnp_Amount: data.vnp_Amount ? Number(data.vnp_Amount) : 0,
+  //     // Đảm bảo không có các trường undefined/null lọt vào
+  //   };
+
+  //   // 2. Sử dụng thư viện để kiểm tra
+  //   // Lưu ý: verifyReturnUrl trả về object có isVerified (tùy version của nestjs-vnpay)
+  //   const verifyResult = this.vnpay.verifyReturnUrl(vnpayData as any);
+
+  //   const isSuccess = data.vnp_ResponseCode === '00' && data.vnp_TransactionStatus === '00';
+
+  //   return Promise.resolve({
+  //     isValid: verifyResult.isVerified, // Nếu vẫn false, hãy kiểm tra vnp_HashSecret trong config
+  //     isSuccess: isSuccess,
+  //     txnRef: String(data.vnp_TxnRef ?? ''),
+  //     providerTransId: String(data.vnp_TransactionNo ?? ''),
+  //     message: verifyResult.isVerified
+  //       ? (isSuccess ? 'Success' : `VNPay Error Code: ${data.vnp_ResponseCode}`)
+  //       : 'Chữ ký không hợp lệ',
+  //   });
+  // }
 }

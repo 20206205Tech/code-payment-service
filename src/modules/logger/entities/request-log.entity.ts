@@ -21,8 +21,10 @@ export class RequestLog {
   @Column({ type: 'text' })
   url: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  // @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   clientIp: string;
+  // clientIp: string;
 
   @Column({ type: 'int' })
   statusCode: number;

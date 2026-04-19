@@ -13,6 +13,7 @@ import { USER_PROFILE_PORT } from '../application/ports/services/user-profile.po
 import { OutboxRelayCron } from './cron/outbox-relay.cron';
 import { PlanCleanupCron } from './cron/plan-cleanup.cron';
 import { SubscriptionExpirationCron } from './cron/subscription-expiration.cron';
+import { TransactionCleanupCron } from './cron/transaction-cleanup.cron';
 import { OutboxEntity } from './database/entities/outbox.entity';
 import { PlanEntity } from './database/entities/plan.entity';
 import { SubscriptionEntity } from './database/entities/subscription.entity';
@@ -28,6 +29,13 @@ import { VnpayGatewayService } from './payment/gateway/vnpay-gateway.service';
 import { ZalopayGatewayService } from './payment/gateway/zalopay-gateway.service';
 import { PaymentGatewaySelectorService } from './payment/payment-gateway-selector.service';
 import { SupabaseUserProfileService } from './services/supabase-user-profile.service';
+
+const cronProviders: Provider[] = [
+  PlanCleanupCron,
+  OutboxRelayCron,
+  SubscriptionExpirationCron,
+  TransactionCleanupCron,
+];
 
 export const PaymentGatewayInfrastructure = {
   imports: [
@@ -101,8 +109,7 @@ export const PaymentInfrastructure = {
     { provide: EMAIL_SENDER_PORT, useClass: BrevoNotificationAdapter },
     { provide: USER_PROFILE_PORT, useClass: SupabaseUserProfileService },
     { provide: MESSAGE_BROKER_PORT, useClass: KafkaMessageBrokerAdapter },
-    PlanCleanupCron,
-    OutboxRelayCron,
-    SubscriptionExpirationCron,
+
+    ...cronProviders,
   ] as Provider[],
 };

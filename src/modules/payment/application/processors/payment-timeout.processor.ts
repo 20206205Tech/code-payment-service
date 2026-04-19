@@ -1,5 +1,5 @@
 import { Inject, Logger } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { PAYMENT_QUEUE, PAYMENT_TIMEOUT_JOB } from '../../constants';
 import {
@@ -39,6 +39,18 @@ export class PaymentTimeoutProcessor extends WorkerHost {
       `Processing payment timeout for transaction: ${transactionId}`,
     );
 
+    await this.handleExpiration(transactionId);
+  }
+
+  @OnWorkerEvent('failed')
+  async onFailed(job: Job<PaymentTimeoutJobData>, error: Error) {
+    this.logger.error(
+      `Job ${job.id} for transaction ${job.data.transactionId} failed: ${error.message}`,
+    );
+    await this.handleExpiration(job.data.transactionId);
+  }
+
+  private async handleExpiration(transactionId: string): Promise<void> {
     const transaction = await this.transactionRepository.findById(
       new TransactionId(transactionId),
     );
@@ -72,8 +84,6 @@ export class PaymentTimeoutProcessor extends WorkerHost {
       );
     }
 
-    this.logger.log(
-      `Transaction ${transactionId} has been marked as expired due to timeout.`,
-    );
+    this.logger.log(`Transaction ${transactionId} has been marked as expired.`);
   }
 }

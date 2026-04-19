@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { TransactionRepositoryPort } from '../../../application/ports/database/transaction.repository.port';
 import { Transaction } from '../../../domain/entities/transaction';
 import { TransactionId } from '../../../domain/value-objects/transaction-id';
@@ -45,6 +45,17 @@ export class TransactionOrmRepository implements TransactionRepositoryPort {
       skip,
       take: limit,
       order: { createdAt: 'DESC' },
+    });
+    return orms.map((orm) => TransactionMapper.toDomain(orm));
+  }
+
+  async findPendingExpired(timeoutDate: Date): Promise<Transaction[]> {
+    const orms = await this.repo.find({
+      where: {
+        paymentStatus: 'pending',
+        createdAt: LessThan(timeoutDate),
+      },
+      order: { createdAt: 'ASC' },
     });
     return orms.map((orm) => TransactionMapper.toDomain(orm));
   }

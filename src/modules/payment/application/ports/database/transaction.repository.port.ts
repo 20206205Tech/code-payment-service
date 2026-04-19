@@ -15,6 +15,7 @@ export interface TransactionRepositoryPort {
     skip?: number,
     limit?: number,
   ): Promise<Transaction[]>;
+  findPendingExpired(timeoutDate: Date): Promise<Transaction[]>;
   save(transaction: Transaction): Promise<void>;
   delete(id: TransactionId): Promise<void>;
 }
