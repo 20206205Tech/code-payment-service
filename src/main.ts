@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { SWAGGER_AUTH_KEY } from './constants/swagger.constant';
+import { DomainExceptionFilter } from './modules/common/api/http/filters/domain-exception.filter';
 
 async function bootstrap() {
   const ENVIRONMENT = process.env.ENVIRONMENT ?? 'production';
@@ -37,6 +38,9 @@ async function bootstrap() {
   // app.setGlobalPrefix('api', {
   //   exclude: ['/'],
   // });
+
+  // Đăng ký Global Exception Filter
+  app.useGlobalFilters(new DomainExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
