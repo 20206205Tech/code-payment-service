@@ -1,5 +1,5 @@
-export const SWAGGER_DOCS_PATH = 'docs';
 export const SWAGGER_AUTH_KEY = 'bearerAuth';
+export const SWAGGER_DOCS_PATH = 'docs';
 export const SWAGGER_UI_CDN =
   'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5';
 export const SWAGGER_CUSTOM_FAVICON =

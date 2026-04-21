@@ -28,7 +28,7 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
     txnRef: string,
   ): Promise<void> {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.ENVIRONMENT === 'development') {
         email = this.emailAddressDev || email;
         this.logger.debug(
           `Development mode: Overriding recipient email to ${email} for testing purposes.`,
@@ -70,7 +70,7 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
     daysRemaining: number,
   ): Promise<void> {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.ENVIRONMENT === 'development') {
         email = this.emailAddressDev || email;
       }
 
@@ -112,7 +112,7 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
     planName: string,
   ): Promise<void> {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.ENVIRONMENT === 'development') {
         email = this.emailAddressDev || email;
       }
 

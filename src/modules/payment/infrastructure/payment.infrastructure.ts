@@ -51,7 +51,7 @@ export const PaymentGatewayInfrastructure = {
         vnpayHost: configService.getOrThrow<string>(
           'PAYMENT_VNPAY_PAYMENT_URL',
         ),
-        testMode: process.env.NODE_ENV === 'development',
+        testMode: process.env.ENVIRONMENT === 'development',
       }),
     }),
   ],
@@ -70,25 +70,12 @@ export const PaymentGatewayInfrastructure = {
 
 export const PaymentInfrastructure = {
   imports: [
-    // HttpModule,
     TypeOrmModule.forFeature([
       PlanEntity,
       SubscriptionEntity,
       TransactionEntity,
       OutboxEntity,
     ]),
-    // VnpayModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: (configService: ConfigService) => ({
-    //     tmnCode: configService.getOrThrow<string>('PAYMENT_VNPAY_TMN_CODE'),
-    //     secureSecret: configService.getOrThrow<string>(
-    //       'PAYMENT_VNPAY_HASH_SECRET_KEY',
-    //     ),
-    //     vnpayHost: configService.getOrThrow<string>('PAYMENT_VNPAY_PAYMENT_URL'),
-    //     testMode: process.env.NODE_ENV === 'development',
-    //   }),
-    // }),
     ...PaymentGatewayInfrastructure.imports,
   ],
   providers: [
@@ -102,14 +89,9 @@ export const PaymentInfrastructure = {
       provide: TRANSACTION_REPOSITORY_PORT,
       useClass: TransactionOrmRepository,
     },
-    // {
-    //   provide: PAYMENT_GATEWAY_PORT,
-    //   useClass: PaymentGatewaySelectorService,
-    // },
     { provide: EMAIL_SENDER_PORT, useClass: BrevoNotificationAdapter },
     { provide: USER_PROFILE_PORT, useClass: SupabaseUserProfileService },
     { provide: MESSAGE_BROKER_PORT, useClass: KafkaMessageBrokerAdapter },
-
     ...cronProviders,
   ] as Provider[],
 };

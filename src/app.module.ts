@@ -33,14 +33,15 @@ import { PaymentModule } from './modules/payment/payment.module';
         ),
         autoLoadEntities: true,
         synchronize: false,
-        logging: configService.getOrThrow<string>('NODE_ENV') === 'development',
+        logging:
+          configService.getOrThrow<string>('ENVIRONMENT') === 'development',
         ssl:
-          configService.getOrThrow<string>('NODE_ENV') === 'test'
+          configService.getOrThrow<string>('ENVIRONMENT') === 'test'
             ? false
             : true,
         extra: {
           ssl:
-            configService.getOrThrow<string>('NODE_ENV') === 'test'
+            configService.getOrThrow<string>('ENVIRONMENT') === 'test'
               ? false
               : { rejectUnauthorized: false }, // Cho phép chứng chỉ tự ký (self-signed)
           max: 1, // Giới hạn tối đa 1 connection trong pool (Hữu ích khi chạy serverless để tránh cạn kiệt connection)

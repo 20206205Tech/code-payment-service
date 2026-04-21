@@ -19,7 +19,7 @@ export class KafkaMessageBrokerAdapter
   private readonly producer: Producer;
 
   private static readonly TOPIC_SUBSCRIPTION_PURCHASED =
-    process.env.NODE_ENV === 'development'
+    process.env.ENVIRONMENT === 'development'
       ? 'dev-payment-events'
       : 'prod-payment-events';
 
