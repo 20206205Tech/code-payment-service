@@ -35,7 +35,7 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: |
           echo "=== Các file Migration hiện có ==="
-          doppler run -p 20206205tech -c prd -- npm run migration:show
+          doppler run -p 20206205tech -c prod -- npm run migration:show
 
       - name: Apply Changes
         if: github.ref == 'refs/heads/main'
@@ -43,4 +43,4 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: |
           echo "=== Đang chạy Migration ==="
-          doppler run -p 20206205tech -c prd -- npm run migration:run
+          doppler run -p 20206205tech -c prod -- npm run migration:run
