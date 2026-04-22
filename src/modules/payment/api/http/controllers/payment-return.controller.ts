@@ -44,6 +44,10 @@ export class PaymentReturnController extends BaseController {
         success: true,
         message: `${providerName} transaction success`,
         data: result.txnRef,
+        web:
+          process.env.ENVIRONMENT === 'development'
+            ? 'http://localhost:3000/'
+            : 'https://20206205.tech/',
       };
     }
 
