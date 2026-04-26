@@ -36,9 +36,7 @@ async function bootstrap() {
     }),
   });
 
-  // app.setGlobalPrefix('api', {
-  //   exclude: ['/'],
-  // });
+  app.setGlobalPrefix(`${SERVICE_NAME}`);
 
   // Đăng ký Global Exception Filter
   app.useGlobalFilters(new DomainExceptionFilter());
@@ -72,7 +70,12 @@ async function bootstrap() {
     },
   };
 
-  SwaggerModule.setup('docs', app, documentFactory, customOptions);
+  SwaggerModule.setup(
+    `${SERVICE_NAME}/docs`,
+    app,
+    documentFactory,
+    customOptions,
+  );
 
   await app.listen(PORT);
 }
