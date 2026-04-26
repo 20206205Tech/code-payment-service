@@ -12,17 +12,15 @@ import { DomainExceptionFilter } from './modules/common/api/http/filters/domain-
 async function bootstrap() {
   const ENVIRONMENT = process.env.ENVIRONMENT ?? 'production';
   const PORT = process.env.PORT ?? 30001;
-  const SERVICE_NAME = 'payment-service';
+  const SERVICE_NAME = 'code-payment-service';
 
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
 
   const DESCRIPTION = `
 # Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})
 
-* [Local API](http://localhost:${PORT})
-* [Local Swagger](http://localhost:${PORT}/docs)
-* [Dev API](https://dev-code-${SERVICE_NAME}.20206205.tech)
-* [Dev Swagger](https://dev-code-${SERVICE_NAME}.20206205.tech/docs)
+* [Local](http://localhost:${PORT})
+* [Dev](https://dev-${SERVICE_NAME}.20206205.tech)
 * [Đăng nhập với Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)
 
   `.trim();
