@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { SubscriptionStatus } from '../../../domain/value-objects/subscription-status';
+
 @Entity('subscription')
 export class SubscriptionEntity {
   @PrimaryColumn({ type: 'uuid' })
@@ -25,14 +27,17 @@ export class SubscriptionEntity {
 
   @Column({
     type: 'enum',
-    enum: ['pending', 'active', 'expired'],
-    default: 'pending',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.PENDING,
   })
-  status: string;
+  status: SubscriptionStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ name: 'version', type: 'int', default: 1 })
+  version: number;
 }

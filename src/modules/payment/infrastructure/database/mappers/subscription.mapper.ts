@@ -1,10 +1,7 @@
-import {
-  Subscription,
-  type SubscriptionStatus,
-} from '../../../domain/entities/subscription';
+import { UserId } from '@20206205tech/nestjs-common';
+import { Subscription } from '../../../domain/entities/subscription';
 import { PlanId } from '../../../domain/value-objects/plan-id';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
-import { UserId } from '../../../domain/value-objects/user-id';
 import { SubscriptionEntity } from '../entities/subscription.entity';
 
 export class SubscriptionMapper {
@@ -15,9 +12,10 @@ export class SubscriptionMapper {
       planId: new PlanId(orm.planId),
       startDate: orm.startDate,
       endDate: orm.endDate,
-      status: orm.status as SubscriptionStatus,
+      status: orm.status,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
+      version: orm.version,
     });
   }
 
@@ -31,6 +29,7 @@ export class SubscriptionMapper {
     orm.status = domain.status;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;
+    orm.version = domain.version.value;
     return orm;
   }
 }

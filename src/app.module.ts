@@ -4,9 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { AuthModule } from './modules/auth/auth.module';
-import { LoggerModule } from './modules/logger/logger.module';
+import { AuthModule } from '@20206205tech/nestjs-common';
 import { PaymentModule } from './modules/payment/payment.module';
+import { LoggerModule } from './modules/logger/logger.module';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { PaymentModule } from './modules/payment/payment.module';
           'MICROSERVICE_PAYMENT_SERVICE_DATABASE_URL',
         ),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: configService.get<string>('ENVIRONMENT') === 'test',
         logging:
           configService.getOrThrow<string>('ENVIRONMENT') === 'development',
         ssl:
@@ -44,7 +44,7 @@ import { PaymentModule } from './modules/payment/payment.module';
             configService.getOrThrow<string>('ENVIRONMENT') === 'test'
               ? false
               : { rejectUnauthorized: false }, // Cho phép chứng chỉ tự ký (self-signed)
-          max: 1, // Giới hạn tối đa 1 connection trong pool (Hữu ích khi chạy serverless để tránh cạn kiệt connection)
+          max: 10, // Tăng giới hạn connection để tránh timeout khi có nhiều tiến trình (API + Cron)
           connectionTimeoutMillis: 5000, // Timeout kết nối sau 5s
         },
       }),

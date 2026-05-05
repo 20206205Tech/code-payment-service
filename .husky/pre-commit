@@ -8,3 +8,16 @@ else
   echo "❌ Lint-staged failed! Please fix the issues above."
   exit 1
 fi
+
+echo "Dùng depcruise để kiểm tra DDD"
+
+npm run ddd:check
+
+echo "Dùng depcruise để tạo sơ đồ"
+npm run ddd:docs
+npm run ddd:docs-architecture
+npm run ddd:docs-architecture-summary
+git add docs
+
+echo "Chạy Test Coverage"
+npm run test:cov

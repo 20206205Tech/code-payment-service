@@ -1,4 +1,4 @@
-import { DomainException } from '../../../common/domain/exceptions/domain.exception';
+import { DomainException } from '@20206205tech/nestjs-common';
 
 export class SubscriptionNotFoundException extends DomainException {
   constructor(subscriptionId?: string) {

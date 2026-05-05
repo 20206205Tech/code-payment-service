@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { QueryHandler } from '@nestjs/cqrs';
-import { BaseQueryHandler } from '../../../common/application/queries/base.query-handler';
+import { BaseQueryHandler } from '@20206205tech/nestjs-common';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,

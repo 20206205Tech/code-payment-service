@@ -2,17 +2,19 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { VnpayService as NestjsVnpayService } from 'nestjs-vnpay';
 import {
-  ProductCode,
-  VnpLocale,
   dateFormat,
+  ProductCode,
   ReturnQueryFromVNPay,
   VerifyReturnUrl,
+  VnpLocale,
 } from 'vnpay';
+import { PaymentProvider } from '../payment-provider.enum';
 import {
   IpnVerifyResult,
   PaymentGatewayPort,
   PaymentInput,
 } from '../../../application/ports/payment/payment-gateway.port';
+import { getPaymentReturnUrl } from './url-helper';
 
 @Injectable()
 export class VnpayGatewayService implements PaymentGatewayPort {
@@ -27,7 +29,10 @@ export class VnpayGatewayService implements PaymentGatewayPort {
     const expireDate = new Date();
     expireDate.setMinutes(createDate.getMinutes() + 5);
 
-    const returnUrl = `${this.configService.getOrThrow<string>('PAYMENT_RETURN_URL')}/vnpay`;
+    const returnUrl = getPaymentReturnUrl(
+      this.configService,
+      PaymentProvider.VNPAY,
+    );
 
     const url = this.vnpay.buildPaymentUrl({
       vnp_Amount: input.amount,
@@ -74,6 +79,9 @@ export class VnpayGatewayService implements PaymentGatewayPort {
         isValid: verifyResult.isVerified,
         isSuccess: isSuccess,
         txnRef: String(vnpQuery.vnp_TxnRef ?? ''),
+        amount: vnpQuery.vnp_Amount
+          ? Number(vnpQuery.vnp_Amount) / 100
+          : undefined,
         providerTransId: String(vnpQuery.vnp_TransactionNo ?? ''),
         message: verifyResult.isVerified
           ? isSuccess

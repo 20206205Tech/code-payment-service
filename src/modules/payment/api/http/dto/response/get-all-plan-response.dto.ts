@@ -1,4 +1,4 @@
-import { BaseResponseDto } from '../../../../../common/api/http/dto/response/base.response.dto';
+import { BaseResponseDto } from '@20206205tech/nestjs-common';
 import { DataGetDetailPlanResponseDto } from './get-detail-plan-response.dto';
 
 // Ở đây trả về một mảng các kế hoạch

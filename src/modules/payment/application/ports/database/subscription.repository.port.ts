@@ -1,6 +1,6 @@
+import { UserId } from '@20206205tech/nestjs-common';
 import { Subscription } from '../../../domain/entities/subscription';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
-import { UserId } from '../../../domain/value-objects/user-id';
 
 export const SUBSCRIPTION_REPOSITORY_PORT = Symbol(
   'SUBSCRIPTION_REPOSITORY_PORT',
@@ -9,6 +9,8 @@ export const SUBSCRIPTION_REPOSITORY_PORT = Symbol(
 export interface SubscriptionRepositoryPort {
   findById(id: SubscriptionId): Promise<Subscription | null>;
   findActiveByUserId(userId: UserId): Promise<Subscription | null>;
+  findLatestActiveSubscription(userId: UserId): Promise<Subscription | null>;
+  findAllActiveByUserId(userId: UserId): Promise<Subscription[]>;
   isFirstPurchase(userId: UserId): Promise<boolean>;
   deactivateOtherSubscriptions(
     userId: UserId,
@@ -16,6 +18,6 @@ export interface SubscriptionRepositoryPort {
   ): Promise<void>;
   findActiveExpiringBefore(date: Date): Promise<Subscription[]>;
   findActiveExpiringBetween(start: Date, end: Date): Promise<Subscription[]>;
-  save(subscription: Subscription): Promise<void>;
+  save(subscription: Subscription, context?: any): Promise<void>;
   delete(id: SubscriptionId): Promise<void>;
 }

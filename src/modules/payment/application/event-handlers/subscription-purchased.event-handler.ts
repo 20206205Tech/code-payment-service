@@ -1,10 +1,9 @@
-import { Inject, Logger } from '@nestjs/common';
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Inject } from '@nestjs/common';
+import { EventsHandler } from '@nestjs/cqrs';
+import { BaseEventHandler } from '@20206205tech/nestjs-common';
+
 import { SubscriptionPurchasedEvent } from '../../domain/events/subscription-purchased.event';
 import { PlanId } from '../../domain/value-objects/plan-id';
-import { OutboxEntity } from '../../infrastructure/database/entities/outbox.entity';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -20,12 +19,10 @@ import {
 import {
   USER_PROFILE_PORT,
   type UserProfilePort,
-} from '../ports/services/user-profile.port';
+} from '../ports/service/user-profile.port';
 
 @EventsHandler(SubscriptionPurchasedEvent)
-export class SubscriptionPurchasedEventHandler implements IEventHandler<SubscriptionPurchasedEvent> {
-  private readonly logger = new Logger(SubscriptionPurchasedEventHandler.name);
-
+export class SubscriptionPurchasedEventHandler extends BaseEventHandler<SubscriptionPurchasedEvent> {
   constructor(
     @Inject(USER_PROFILE_PORT)
     private readonly userProfilePort: UserProfilePort,
@@ -35,9 +32,9 @@ export class SubscriptionPurchasedEventHandler implements IEventHandler<Subscrip
     private readonly transactionRepository: TransactionRepositoryPort,
     @Inject(EMAIL_SENDER_PORT)
     private readonly emailSenderPort: EmailSenderPort,
-    @InjectRepository(OutboxEntity)
-    private readonly outboxRepo: Repository<OutboxEntity>,
-  ) {}
+  ) {
+    super();
+  }
 
   async handle(event: SubscriptionPurchasedEvent): Promise<void> {
     const { userId, planId, subscriptionId } = event;
@@ -78,28 +75,6 @@ export class SubscriptionPurchasedEventHandler implements IEventHandler<Subscrip
 
       this.logger.log(
         `Email notification sent for subscription ${subscriptionId} to ${customerEmail}`,
-      );
-
-      // 5. Ghi outbox record để relay lên Kafka Aiven
-      await this.outboxRepo.save(
-        this.outboxRepo.create({
-          aggregateType: 'Subscription',
-          aggregateId: subscriptionId,
-          eventType: 'SubscriptionPurchasedEvent',
-          payload: {
-            subscriptionId,
-            userId,
-            planId,
-            startDate: event.startDate.toISOString(),
-            endDate: event.endDate.toISOString(),
-          },
-          status: 'PENDING',
-          retryCount: 0,
-        }),
-      );
-
-      this.logger.log(
-        `📥 Outbox: recorded SubscriptionPurchasedEvent for subscriptionId=${subscriptionId} → pending Kafka relay`,
       );
     } catch (error) {
       this.logger.error(`Error handling SubscriptionPurchasedEvent:`, error);

@@ -1,21 +1,23 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import {
-  Inject,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, InternalServerErrorException } from '@nestjs/common';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
 import { ConfigService } from '@nestjs/config';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
+import { BaseCommandHandler } from '@20206205tech/nestjs-common';
+
 import { Queue } from 'bullmq';
 import { addMonths } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
-import { PAYMENT_QUEUE, PAYMENT_TIMEOUT_JOB } from '../../constants';
-import { Subscription } from '../../domain/entities/subscription';
-import { Transaction } from '../../domain/entities/transaction';
+import { UserId } from '@20206205tech/nestjs-common';
+import { SubscriptionFactory } from '../../domain/factories/subscription.factory';
+import { TransactionFactory } from '../../domain/factories/transaction.factory';
 import { Money } from '../../domain/value-objects/money';
+import {
+  PAYMENT_QUEUE,
+  PAYMENT_TIMEOUT_QUEUE,
+  PAYMENT_TIMEOUT_MS,
+} from '../../domain/value-objects/constants';
 import { PlanId } from '../../domain/value-objects/plan-id';
-import { UserId } from '../../domain/value-objects/user-id';
-import { PaymentGatewaySelectorService } from '../../infrastructure/payment/payment-gateway-selector.service';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -35,7 +37,10 @@ import {
 import { PurchaseSubscriptionCommand } from './purchase-subscription.command';
 
 @CommandHandler(PurchaseSubscriptionCommand)
-export class PurchaseSubscriptionCommandHandler implements ICommandHandler<PurchaseSubscriptionCommand> {
+export class PurchaseSubscriptionCommandHandler extends BaseCommandHandler<
+  PurchaseSubscriptionCommand,
+  string
+> {
   constructor(
     @Inject(PLAN_REPOSITORY_PORT)
     private readonly planRepository: PlanRepositoryPort,
@@ -48,25 +53,23 @@ export class PurchaseSubscriptionCommandHandler implements ICommandHandler<Purch
     @InjectQueue(PAYMENT_QUEUE)
     private readonly paymentQueue: Queue,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    super();
+  }
 
   async execute(command: PurchaseSubscriptionCommand): Promise<string> {
-    const planId = new PlanId(command.planId);
     const userId = new UserId(command.userId);
+    const planId = new PlanId(command.planId);
 
     const plan = await this.planRepository.findById(planId);
-    if (!plan || !plan.isActive)
-      throw new NotFoundException(
-        'Gối dịch vụ không tồn tại hoặc đã vô hiệu hóa',
-      );
-
-    const discountAmount = new Money(0);
-    const finalAmount = plan.price;
+    if (!plan || !plan.isActive) {
+      throw new PlanNotFoundException(planId.value);
+    }
 
     const startDate = new Date();
     const endDate = addMonths(startDate, plan.durationMonths);
 
-    const subscription = Subscription.create(
+    const subscription = SubscriptionFactory.create(
       userId,
       planId,
       startDate,
@@ -78,64 +81,50 @@ export class PurchaseSubscriptionCommandHandler implements ICommandHandler<Purch
     const yymmdd = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
     const txnRef = `${yymmdd}_${uuidv4().slice(0, 6).toUpperCase()}`;
 
-    const transaction = Transaction.create(
+    const defaultProvider = this.configService.get<string>(
+      'PAYMENT_DEFAULT_PROVIDER',
+      'vnpay',
+    );
+
+    const transaction = TransactionFactory.create(
       userId,
       subscription.subscriptionId,
       planId,
       plan.price,
-      discountAmount,
-      finalAmount,
+      new Money(0), // discountAmount
+      plan.price, // finalAmount
       txnRef,
-      command.provider, // Sử dụng provider từ command
-      { customer_email: command.email },
+      defaultProvider,
+      {
+        customer_email: command.email,
+        redirect_url: command.redirectUrl,
+      },
     );
     await this.transactionRepository.save(transaction);
 
-    // Thêm Number() để ép kiểu chuỗi "600000" thành số 600000 lúc chạy thực tế
-    const timeoutMs = Number(
-      this.configService.getOrThrow('PAYMENT_TIMEOUT_MS'),
-    );
+    const timeoutMs = PAYMENT_TIMEOUT_MS;
 
     console.log(
       '🚀 ~ PurchaseSubscriptionCommandHandler ~ execute ~ timeoutMs:',
       timeoutMs,
       'Type:',
-      typeof timeoutMs, // Nên in ra 'number'
+      typeof timeoutMs,
     );
 
-    // await this.paymentQueue.add(
-    //   PAYMENT_TIMEOUT_JOB,
-    //   { transactionId: transaction.transactionId.value },
-    //   { delay: timeoutMs },
-    // );
-
-    // // Thêm job timeout vào queue
-    // const timeoutMs =
-    //   this.configService.getOrThrow<number>('PAYMENT_TIMEOUT_MS');
-    // console.log(
-    //   '🚀 ~ PurchaseSubscriptionCommandHandler ~ execute ~ timeoutMs:',
-    //   timeoutMs,
-    // );
     await this.paymentQueue.add(
-      PAYMENT_TIMEOUT_JOB,
+      PAYMENT_TIMEOUT_QUEUE,
       { transactionId: transaction.transactionId.value },
       { delay: timeoutMs },
     );
 
     try {
-      // Ép kiểu để dùng hàm getGateway cụ thể của selector
-      const selector = this.paymentGateway as PaymentGatewaySelectorService;
-      const gateway =
-        typeof selector.getGateway === 'function'
-          ? selector.getGateway(command.provider)
-          : this.paymentGateway;
-
-      return await gateway.createPaymentUrl({
+      return await this.paymentGateway.createPaymentUrl({
         txn_ref: txnRef,
-        amount: finalAmount.amount,
+        amount: plan.price.amount,
         description: `Thanh toan dang ky: ${plan.name} #${txnRef}`,
         client_ip: command.clientIp,
         user_id: command.userId,
+        provider: defaultProvider,
       });
     } catch (error: unknown) {
       await this.transactionRepository.delete(transaction.transactionId);

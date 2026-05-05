@@ -16,7 +16,9 @@ import {
 import {
   USER_PROFILE_PORT,
   type UserProfilePort,
-} from '../../application/ports/services/user-profile.port';
+} from '../../application/ports/service/user-profile.port';
+import { Transaction } from '../../domain/entities/transaction';
+import { PaymentDomainService } from '../../domain/services/payment.domain-service';
 
 @Injectable()
 export class SubscriptionExpirationCron {
@@ -31,6 +33,7 @@ export class SubscriptionExpirationCron {
     private readonly userProfileService: UserProfilePort,
     @Inject(EMAIL_SENDER_PORT)
     private readonly notificationService: EmailSenderPort,
+    private readonly paymentDomainService: PaymentDomainService,
     private readonly publisher: EventPublisher,
   ) {}
 
@@ -59,17 +62,17 @@ export class SubscriptionExpirationCron {
       return;
     }
 
-    this.logger.log(
-      `Tìm thấy ${expiredSubscriptions.length} subscription đã hết hạn. Đang xử lý...`,
-    );
-
-    for (const sub of expiredSubscriptions) {
+    for (const subData of expiredSubscriptions) {
       try {
-        const subscription = this.publisher.mergeObjectContext(sub);
-        subscription.expire();
+        const sub = subData;
 
-        await this.subscriptionRepo.save(subscription);
-        subscription.commit();
+        // Use Domain Service to handle expiration logic
+        this.paymentDomainService.expirePayment(
+          null as unknown as Transaction,
+          sub,
+        );
+
+        await this.subscriptionRepo.save(sub);
 
         // Gửi email thông báo đã hết hạn
         const [profile, plan] = await Promise.all([
@@ -88,9 +91,11 @@ export class SubscriptionExpirationCron {
         this.logger.log(
           `Đã xử lý hết hạn cho subscription: ${sub.subscriptionId.value}`,
         );
+
+        sub.commit();
       } catch (error) {
         this.logger.error(
-          `Lỗi khi xử lý hết hạn cho subscription ${sub.subscriptionId.value}:`,
+          `Lỗi khi xử lý hết hạn cho subscription ${subData.subscriptionId.value}:`,
           error,
         );
       }

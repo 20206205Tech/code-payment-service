@@ -1,10 +1,13 @@
+import { UserId } from '@20206205tech/nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, LessThan, Not, Repository } from 'typeorm';
+import { Between, EntityManager, LessThan, Not, Repository } from 'typeorm';
 import { SubscriptionRepositoryPort } from '../../../application/ports/database/subscription.repository.port';
 import { Subscription } from '../../../domain/entities/subscription';
+import { SubscriptionPurchasedEvent } from '../../../domain/events/subscription-purchased.event';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
-import { UserId } from '../../../domain/value-objects/user-id';
+import { SubscriptionStatus } from '../../../domain/value-objects/subscription-status';
+import { OutboxEntity } from '../entities/outbox.entity';
 import { SubscriptionEntity } from '../entities/subscription.entity';
 import { SubscriptionMapper } from '../mappers/subscription.mapper';
 
@@ -22,10 +25,28 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
 
   async findActiveByUserId(userId: UserId): Promise<Subscription | null> {
     const orm = await this.repo.findOne({
-      where: { userId: userId.value, status: 'active' },
+      where: { userId: userId.value, status: SubscriptionStatus.ACTIVE },
       order: { endDate: 'DESC' },
     });
     return orm ? SubscriptionMapper.toDomain(orm) : null;
+  }
+
+  async findLatestActiveSubscription(
+    userId: UserId,
+  ): Promise<Subscription | null> {
+    const orm = await this.repo.findOne({
+      where: { userId: userId.value, status: SubscriptionStatus.ACTIVE },
+      order: { endDate: 'DESC' },
+    });
+    return orm ? SubscriptionMapper.toDomain(orm) : null;
+  }
+
+  async findAllActiveByUserId(userId: UserId): Promise<Subscription[]> {
+    const orms = await this.repo.find({
+      where: { userId: userId.value, status: SubscriptionStatus.ACTIVE },
+      order: { endDate: 'DESC' },
+    });
+    return orms.map((orm) => SubscriptionMapper.toDomain(orm));
   }
 
   async isFirstPurchase(userId: UserId): Promise<boolean> {
@@ -40,12 +61,12 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
     const others = await this.repo.find({
       where: {
         userId: userId.value,
-        status: 'active',
+        status: SubscriptionStatus.ACTIVE,
         id: Not(excludeId.value),
       },
     });
     for (const sub of others) {
-      sub.status = 'expired';
+      sub.status = SubscriptionStatus.EXPIRED;
       await this.repo.save(sub);
     }
   }
@@ -53,7 +74,7 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
   async findActiveExpiringBefore(date: Date): Promise<Subscription[]> {
     const orms = await this.repo.find({
       where: {
-        status: 'active',
+        status: SubscriptionStatus.ACTIVE,
         endDate: LessThan(date),
       },
     });
@@ -66,16 +87,47 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
   ): Promise<Subscription[]> {
     const orms = await this.repo.find({
       where: {
-        status: 'active',
+        status: SubscriptionStatus.ACTIVE,
         endDate: Between(start, end),
       },
     });
     return orms.map((orm) => SubscriptionMapper.toDomain(orm));
   }
 
-  async save(subscription: Subscription): Promise<void> {
+  async save(
+    subscription: Subscription,
+    context?: EntityManager,
+  ): Promise<void> {
+    const manager = context || this.repo.manager;
     const orm = SubscriptionMapper.toOrm(subscription);
-    await this.repo.save(orm);
+
+    // Lưu Subscription và Outbox trong cùng một transaction
+    await manager.save(orm);
+
+    // Lấy các sự kiện chưa được commit từ Domain Aggregate
+    const events = subscription.getUncommittedEvents();
+
+    for (const event of events) {
+      if (event instanceof SubscriptionPurchasedEvent) {
+        const outbox = manager.create(OutboxEntity, {
+          aggregateType: 'Subscription',
+          aggregateId: subscription.subscriptionId.value,
+          eventType: 'SubscriptionPurchasedEvent',
+          payload: {
+            subscriptionId: event.subscriptionId,
+            userId: event.userId,
+            planId: event.planId,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            version: event.version,
+          },
+
+          status: 'PENDING',
+          retryCount: 0,
+        });
+        await manager.save(outbox);
+      }
+    }
   }
 
   async delete(id: SubscriptionId): Promise<void> {

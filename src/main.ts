@@ -1,6 +1,10 @@
 import { initTracing } from './tracing';
 initTracing();
 
+import {
+  DomainExceptionFilter,
+  SWAGGER_AUTH_KEY,
+} from '@20206205tech/nestjs-common';
 import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -9,8 +13,6 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { SWAGGER_AUTH_KEY } from './constants/swagger.constant';
-import { DomainExceptionFilter } from './modules/common/api/http/filters/domain-exception.filter';
 
 async function bootstrap() {
   const ENVIRONMENT = process.env.ENVIRONMENT ?? 'production';
@@ -19,14 +21,12 @@ async function bootstrap() {
 
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
 
-  const DESCRIPTION = `
-# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})
-
-* [Local](http://localhost:${PORT})
-* [Dev](https://dev-${SERVICE_NAME}.20206205.tech)
-* [Đăng nhập với Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)
-
-  `.trim();
+  let DESCRIPTION = '';
+  DESCRIPTION += `# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})\n`;
+  DESCRIPTION += `* [Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)\n`;
+  DESCRIPTION += `* [Local](http://localhost:${PORT}/${SERVICE_NAME})\n`;
+  DESCRIPTION += `* [Dev](https://dev-${SERVICE_NAME}.20206205.tech/${SERVICE_NAME})\n`;
+  DESCRIPTION = DESCRIPTION.trim();
 
   Logger.debug(`DESCRIPTION: \n${DESCRIPTION}`);
 

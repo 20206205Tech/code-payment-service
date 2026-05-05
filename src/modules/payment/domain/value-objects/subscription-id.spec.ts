@@ -1,30 +1,27 @@
 import { SubscriptionId } from './subscription-id';
 
+const VALID_UUID = '550e8400-e29b-41d4-a716-446655440000';
+
 describe('SubscriptionId', () => {
-  const validUuid = '123e4567-e89b-12d3-a456-426614174000';
-
-  it('should create an instance with a valid UUID', () => {
-    const subscriptionId = new SubscriptionId(validUuid);
-    expect(subscriptionId).toBeDefined();
-    expect(subscriptionId.value).toBe(validUuid);
+  it('should create SubscriptionId with a valid UUID', () => {
+    const id = new SubscriptionId(VALID_UUID);
+    expect(id.value).toBe(VALID_UUID);
   });
 
-  it('should generate a new instance using the create() factory method', () => {
-    const subscriptionId = SubscriptionId.create();
-    expect(subscriptionId).toBeDefined();
-    // Đảm bảo value được sinh ra là một string không rỗng
-    expect(typeof subscriptionId.value).toBe('string');
-    expect(subscriptionId.value.length).toBeGreaterThan(0);
+  it('should throw for an invalid UUID', () => {
+    expect(() => new SubscriptionId('bad-uuid')).toThrow('Invalid ID format');
   });
 
-  describe('equals()', () => {
-    it('should correctly evaluate equality between SubscriptionIds', () => {
-      const id1 = new SubscriptionId(validUuid);
-      const id2 = new SubscriptionId(validUuid);
-      const id3 = SubscriptionId.create();
+  it('SubscriptionId.create() should generate a valid UUID', () => {
+    const id = SubscriptionId.create();
+    expect(id.value).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+  });
 
-      expect(id1.equals(id2)).toBe(true);
-      expect(id1.equals(id3)).toBe(false);
-    });
+  it('two created SubscriptionIds should be unique', () => {
+    const a = SubscriptionId.create();
+    const b = SubscriptionId.create();
+    expect(a.value).not.toBe(b.value);
   });
 });

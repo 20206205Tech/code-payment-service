@@ -2,11 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { PaymentProvider } from '../payment-provider.enum';
 import {
   IpnVerifyResult,
   PaymentGatewayPort,
   PaymentInput,
 } from '../../../application/ports/payment/payment-gateway.port';
+import { getPaymentCallbackUrl, getPaymentReturnUrl } from './url-helper';
 
 interface ZalopayPaymentResponse {
   return_code: number;
@@ -35,10 +37,13 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
     this.endpoint = this.configService.getOrThrow<string>(
       'PAYMENT_ZALOPAY_ENDPOINT',
     );
-    this.returnUrl =
-      this.configService.getOrThrow<string>('PAYMENT_RETURN_URL');
-    this.callbackUrl = this.configService.getOrThrow<string>(
-      'PAYMENT_CALLBACK_URL',
+    this.returnUrl = getPaymentReturnUrl(
+      this.configService,
+      PaymentProvider.ZALOPAY,
+    );
+    this.callbackUrl = getPaymentCallbackUrl(
+      this.configService,
+      PaymentProvider.ZALOPAY,
     );
   }
 
@@ -54,7 +59,7 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
     const itemJson = JSON.stringify(items);
 
     const embedDataJson = JSON.stringify({
-      redirecturl: `${this.returnUrl}/zalo`,
+      redirecturl: this.returnUrl,
     });
 
     const orderData: Record<string, string | number> = {
@@ -67,7 +72,7 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
       amount: Math.floor(input.amount),
       description: input.description,
       bank_code: 'zalopayapp',
-      callback_url: `${this.callbackUrl}/zalo`,
+      callback_url: this.callbackUrl,
     };
 
     this.logger.log(
@@ -156,6 +161,7 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
       isValid: true, // luôn valid với return URL
       isSuccess,
       txnRef: String(data.apptransid || ''),
+      amount: data.amount ? Number(data.amount) : undefined,
       providerTransId: String(data.apptransid || ''),
       message: isSuccess
         ? 'Thanh toán thành công'
@@ -215,6 +221,7 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
     return {
       isValid: true,
       txnRef: String(dataJson.app_trans_id),
+      amount: dataJson.amount ? Number(dataJson.amount) : undefined,
       providerTransId: String(dataJson.zp_trans_id),
       isSuccess: true,
       message: 'Thanh toán thành công',

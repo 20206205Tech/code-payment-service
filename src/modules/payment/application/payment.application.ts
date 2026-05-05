@@ -22,6 +22,7 @@ import { GetTransactionHistoryQueryHandler } from './queries/get-transaction-his
 
 import { SubscriptionPurchasedEventHandler } from './event-handlers/subscription-purchased.event-handler';
 import { PaymentTimeoutProcessor } from './processors/payment-timeout.processor';
+import { PaymentDomainService } from '../domain/services/payment.domain-service';
 
 const commandHandlers: Type<ICommandHandler>[] = [
   CreatePlanCommandHandler,
@@ -50,5 +51,6 @@ export const PaymentApplication = {
     ...eventHandlers,
     ...queryHandlers,
     PaymentTimeoutProcessor,
+    PaymentDomainService,
   ],
 };

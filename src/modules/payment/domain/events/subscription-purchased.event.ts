@@ -5,5 +5,6 @@ export class SubscriptionPurchasedEvent {
     public readonly planId: string,
     public readonly startDate: Date,
     public readonly endDate: Date,
+    public readonly version: number = 1,
   ) {}
 }

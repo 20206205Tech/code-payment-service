@@ -6,6 +6,6 @@ export class PurchaseSubscriptionCommand implements ICommand {
     public readonly email: string,
     public readonly planId: string,
     public readonly clientIp: string,
-    public readonly provider: string,
+    public readonly redirectUrl?: string,
   ) {}
 }

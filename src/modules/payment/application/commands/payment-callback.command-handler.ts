@@ -1,5 +1,8 @@
-import { Inject, Logger } from '@nestjs/common';
-import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
+import { CommandHandler, EventPublisher } from '@nestjs/cqrs';
+import { BaseCommandHandler } from '@20206205tech/nestjs-common';
+
+import { DataSource } from 'typeorm';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -12,6 +15,10 @@ import {
   TRANSACTION_REPOSITORY_PORT,
   type TransactionRepositoryPort,
 } from '../ports/database/transaction.repository.port';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
+import { SubscriptionNotFoundException } from '../../domain/exceptions/subscription-not-found.exception';
+import { PaymentDomainService } from '../../domain/services/payment.domain-service';
+import { PaymentStatus } from '../../domain/value-objects/payment-status';
 import {
   PAYMENT_GATEWAY_PORT,
   type PaymentGatewayPort,
@@ -19,9 +26,10 @@ import {
 import { PaymentCallbackCommand } from './payment-callback.command';
 
 @CommandHandler(PaymentCallbackCommand)
-export class PaymentCallbackCommandHandler implements ICommandHandler<PaymentCallbackCommand> {
-  private readonly logger = new Logger(PaymentCallbackCommandHandler.name);
-
+export class PaymentCallbackCommandHandler extends BaseCommandHandler<
+  PaymentCallbackCommand,
+  { success: boolean; message: string }
+> {
   constructor(
     @Inject(TRANSACTION_REPOSITORY_PORT)
     private readonly transactionRepository: TransactionRepositoryPort,
@@ -31,8 +39,12 @@ export class PaymentCallbackCommandHandler implements ICommandHandler<PaymentCal
     private readonly planRepository: PlanRepositoryPort,
     @Inject(PAYMENT_GATEWAY_PORT)
     private readonly paymentGateway: PaymentGatewayPort,
+    private readonly dataSource: DataSource,
     private readonly publisher: EventPublisher,
-  ) {}
+    private readonly paymentDomainService: PaymentDomainService,
+  ) {
+    super();
+  }
 
   async execute(
     command: PaymentCallbackCommand,
@@ -62,7 +74,18 @@ export class PaymentCallbackCommandHandler implements ICommandHandler<PaymentCal
         return { success: false, message: 'Giao dịch không tồn tại' };
       }
 
-      if (txn.paymentStatus === 'expired') {
+      // Kiểm tra số tiền (Security check)
+      if (
+        verifyResult.amount !== undefined &&
+        Math.abs(verifyResult.amount - txn.finalAmount.amount) > 0.01
+      ) {
+        this.logger.error(
+          `Amount mismatch for txn ${txn.transactionRef}. Expected: ${txn.finalAmount.amount}, Received: ${verifyResult.amount}`,
+        );
+        return { success: false, message: 'Số tiền không khớp' };
+      }
+
+      if (txn.paymentStatus === PaymentStatus.EXPIRED) {
         this.logger.warn(
           `Transaction ${txn.transactionRef} paid BUT EXPIRED. Manual support required.`,
         );
@@ -84,35 +107,54 @@ export class PaymentCallbackCommandHandler implements ICommandHandler<PaymentCal
       txn.setProviderTransactionId(verifyResult.providerTransId);
       txn.setPaidAt(new Date());
 
-      const subscriptionData = await this.subscriptionRepository.findById(
-        txn.subscriptionId,
-      );
+      const [subscriptionData, plan] = await Promise.all([
+        this.subscriptionRepository.findById(txn.subscriptionId),
+        this.planRepository.findById(txn.planId),
+      ]);
+
       if (!subscriptionData) {
         this.logger.error(
           `Subscription not found for txn ${txn.transactionRef}`,
         );
-        throw new Error('Subscription not found');
+        throw new SubscriptionNotFoundException(txn.subscriptionId.value);
       }
 
-      // Merge context để hỗ trợ domain events
-      const subscription = this.publisher.mergeObjectContext(subscriptionData);
+      if (!plan) {
+        throw new PlanNotFoundException(txn.planId.value);
+      }
+
+      const subscription = subscriptionData;
 
       if (verifyResult.isSuccess) {
-        this.logger.log(
-          `Activating subscription and marking txn ${txn.transactionRef} as SUCCESS`,
-        );
-        txn.markSuccess();
-        subscription.activate();
+        // Tìm gói đang active có hạn xa nhất để cộng dồn
+        const latestActiveSub =
+          await this.subscriptionRepository.findLatestActiveSubscription(
+            txn.userId,
+          );
 
-        // Lưu trạng thái
-        await this.subscriptionRepository.deactivateOtherSubscriptions(
-          txn.userId,
-          subscription.subscriptionId,
-        );
-        await this.subscriptionRepository.save(subscription);
-        await this.transactionRepository.save(txn);
+        let baseDate = new Date();
+        if (latestActiveSub && latestActiveSub.endDate > baseDate) {
+          baseDate = latestActiveSub.endDate;
+          this.logger.log(
+            `Stacking subscription for user ${txn.userId.value}. New startDate: ${baseDate.toISOString()}`,
+          );
+        }
 
-        // Commit các domain events (vd: SubscriptionPurchasedEvent)
+        // Use domain service for fulfillment
+        this.paymentDomainService.fulfillPayment(
+          txn,
+          subscription,
+          plan,
+          baseDate,
+        );
+        txn.setPaidAt(new Date());
+
+        await this.dataSource.transaction(async (manager) => {
+          // Không gọi deactivateOtherSubscriptions nữa để cộng dồn
+          await this.subscriptionRepository.save(subscription, manager);
+          await this.transactionRepository.save(txn, manager);
+        });
+
         subscription.commit();
 
         return { success: true, message: 'Thanh toán thành công' };
@@ -120,7 +162,7 @@ export class PaymentCallbackCommandHandler implements ICommandHandler<PaymentCal
         this.logger.warn(
           `Marking txn ${txn.transactionRef} as FAILED. Reason: ${verifyResult.message}`,
         );
-        txn.markFailed();
+        this.paymentDomainService.failPayment(txn);
         // Nếu thanh toán thất bại, ta không kích hoạt gói (giữ ở trạng thái pending hoặc cancel nếu cần)
         await this.transactionRepository.save(txn);
         return { success: false, message: verifyResult.message };

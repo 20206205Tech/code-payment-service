@@ -2,11 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { PaymentProvider } from '../payment-provider.enum';
 import {
   IpnVerifyResult,
   PaymentGatewayPort,
   PaymentInput,
 } from '../../../application/ports/payment/payment-gateway.port';
+import { getPaymentCallbackUrl, getPaymentReturnUrl } from './url-helper';
 
 interface MomoPaymentResponse {
   payUrl?: string;
@@ -35,9 +37,14 @@ export class MomoGatewayService implements PaymentGatewayPort {
     this.endpoint = this.configService.getOrThrow<string>(
       'PAYMENT_MOMO_ENDPOINT',
     );
-    this.redirectUrl =
-      this.configService.getOrThrow<string>('PAYMENT_RETURN_URL');
-    this.ipnUrl = this.configService.getOrThrow<string>('PAYMENT_CALLBACK_URL');
+    this.redirectUrl = getPaymentReturnUrl(
+      this.configService,
+      PaymentProvider.MOMO,
+    );
+    this.ipnUrl = getPaymentCallbackUrl(
+      this.configService,
+      PaymentProvider.MOMO,
+    );
   }
 
   async createPaymentUrl(input: PaymentInput): Promise<string> {
@@ -48,8 +55,8 @@ export class MomoGatewayService implements PaymentGatewayPort {
     const requestType = 'payWithMethod';
     const extraData = '';
 
-    const ipnUrl = `${this.ipnUrl}/momo`;
-    const redirectUrl = `${this.redirectUrl}/momo`;
+    const ipnUrl = this.ipnUrl;
+    const redirectUrl = this.redirectUrl;
 
     const rawSignature = `accessKey=${this.accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${this.partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
@@ -134,6 +141,7 @@ export class MomoGatewayService implements PaymentGatewayPort {
       isValid,
       isSuccess,
       txnRef: orderId,
+      amount: amount ? Number(amount) : undefined,
       providerTransId: transId,
       message: message || (isSuccess ? 'Success' : `MoMo Error: ${resultCode}`),
     });

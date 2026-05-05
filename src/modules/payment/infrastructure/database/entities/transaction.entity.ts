@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { PaymentStatus } from '../../../domain/value-objects/payment-status';
+
 @Entity('transaction')
 export class TransactionEntity {
   @PrimaryColumn({ type: 'uuid' })
@@ -49,10 +51,10 @@ export class TransactionEntity {
   @Column({
     name: 'payment_status',
     type: 'enum',
-    enum: ['pending', 'success', 'failed', 'refunded', 'expired'],
-    default: 'pending',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
   })
-  paymentStatus: string;
+  paymentStatus: PaymentStatus;
 
   @Column({
     name: 'provider_transaction_id',
@@ -73,4 +75,7 @@ export class TransactionEntity {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ name: 'version', type: 'int', default: 1 })
+  version: number;
 }

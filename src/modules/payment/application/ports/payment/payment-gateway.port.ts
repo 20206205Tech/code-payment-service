@@ -6,12 +6,14 @@ export interface PaymentInput {
   description: string;
   client_ip: string;
   user_id: string;
+  provider?: string;
 }
 
 export interface IpnVerifyResult {
   isValid: boolean;
   isSuccess: boolean;
   txnRef: string;
+  amount?: number;
   providerTransId: string;
   message: string;
 }

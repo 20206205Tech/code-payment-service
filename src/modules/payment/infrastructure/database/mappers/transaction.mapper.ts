@@ -1,12 +1,9 @@
-import {
-  Transaction,
-  type PaymentStatus,
-} from '../../../domain/entities/transaction';
+import { UserId } from '@20206205tech/nestjs-common';
+import { Transaction } from '../../../domain/entities/transaction';
 import { Money } from '../../../domain/value-objects/money';
 import { PlanId } from '../../../domain/value-objects/plan-id';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
 import { TransactionId } from '../../../domain/value-objects/transaction-id';
-import { UserId } from '../../../domain/value-objects/user-id';
 import { TransactionEntity } from '../entities/transaction.entity';
 
 export class TransactionMapper {
@@ -21,12 +18,13 @@ export class TransactionMapper {
       finalAmount: new Money(Number(orm.finalAmount)),
       transactionRef: orm.transactionRef,
       paymentMethod: orm.paymentMethod,
-      paymentStatus: orm.paymentStatus as PaymentStatus,
+      paymentStatus: orm.paymentStatus,
       providerTransactionId: orm.providerTransactionId,
       paymentMetadata: orm.paymentMetadata as Record<string, unknown>,
       paidAt: orm.paidAt,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
+      version: orm.version,
     });
   }
 
@@ -47,6 +45,7 @@ export class TransactionMapper {
     orm.paidAt = domain.paidAt;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;
+    orm.version = domain.version.value;
     return orm;
   }
 }

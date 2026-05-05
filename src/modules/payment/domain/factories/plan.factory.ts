@@ -5,9 +5,9 @@ export class PlanFactory {
   static create(
     name: string,
     durationMonths: number,
-    price: number,
+    price: Money,
     isActive: boolean = true,
   ): Plan {
-    return Plan.create(name, durationMonths, new Money(price), isActive);
+    return Plan.create(name, durationMonths, price, isActive);
   }
 }
