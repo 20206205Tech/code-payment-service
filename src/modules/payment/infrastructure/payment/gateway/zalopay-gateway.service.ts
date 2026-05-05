@@ -213,6 +213,7 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
     const dataJson = intermediate as {
       app_trans_id: string | number;
       zp_trans_id: string | number;
+      amount: number;
     };
     console.log(
       '🚀 ~ ZalopayGatewayService ~ verifyIpnCallback ~ dataJson:',
