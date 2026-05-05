@@ -18,18 +18,14 @@ export class Plan extends BaseVersionAggregateRoot {
   private _name: string;
   private _durationMonths: number;
   private _price: Money;
-  private _isActive: boolean;
-  private readonly _createdAt: Date;
   private _updatedAt: Date;
 
   private constructor(props: PlanProps) {
-    super(props.id.value, props.version ?? 1, true, props.createdAt);
+    super(props.id.value, props.version ?? 1, props.isActive, props.createdAt);
     this._planId = props.id;
     this._name = props.name;
     this._durationMonths = props.durationMonths;
     this._price = props.price;
-    this._isActive = props.isActive;
-    this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
   }
 

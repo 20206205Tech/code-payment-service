@@ -38,7 +38,6 @@ export class Transaction extends BaseVersionAggregateRoot {
   private _providerTransactionId: string | null;
   private _paymentMetadata: Record<string, unknown>;
   private _paidAt: Date | null;
-  private readonly _createdAt: Date;
   private _updatedAt: Date;
 
   private constructor(props: TransactionProps) {
@@ -56,7 +55,6 @@ export class Transaction extends BaseVersionAggregateRoot {
     this._providerTransactionId = props.providerTransactionId;
     this._paymentMetadata = props.paymentMetadata;
     this._paidAt = props.paidAt;
-    this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
   }
 
