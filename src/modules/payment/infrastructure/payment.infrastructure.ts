@@ -7,9 +7,9 @@ import { PLAN_REPOSITORY_PORT } from '../application/ports/database/plan.reposit
 import { SUBSCRIPTION_REPOSITORY_PORT } from '../application/ports/database/subscription.repository.port';
 import { TRANSACTION_REPOSITORY_PORT } from '../application/ports/database/transaction.repository.port';
 import { EMAIL_SENDER_PORT } from '../application/ports/email/email-sender.port';
+import { MESSAGE_BROKER_PORT } from '../application/ports/messaging/message-broker.port';
 import { PAYMENT_GATEWAY_PORT } from '../application/ports/payment/payment-gateway.port';
-import { MESSAGE_BROKER_PORT } from '../application/ports/service/message-broker.port';
-import { USER_PROFILE_PORT } from '../application/ports/services/user-profile.port';
+import { USER_PROFILE_PORT } from '../application/ports/service/user-profile.port';
 import { OutboxRelayCron } from './cron/outbox-relay.cron';
 import { PlanCleanupCron } from './cron/plan-cleanup.cron';
 import { SubscriptionExpirationCron } from './cron/subscription-expiration.cron';

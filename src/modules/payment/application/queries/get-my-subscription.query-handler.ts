@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { UserId } from '../../domain/value-objects/user-id';
+import { QueryHandler } from '@nestjs/cqrs';
+import { BaseQueryHandler, UserId } from '@20206205tech/nestjs-common';
+
 import {
   SUBSCRIPTION_REPOSITORY_PORT,
   type SubscriptionRepositoryPort,
@@ -22,20 +23,38 @@ export interface MySubscriptionResponse {
 }
 
 @QueryHandler(GetMySubscriptionQuery)
-export class GetMySubscriptionQueryHandler implements IQueryHandler<GetMySubscriptionQuery> {
+export class GetMySubscriptionQueryHandler extends BaseQueryHandler<
+  GetMySubscriptionQuery,
+  MySubscriptionResponse
+> {
   constructor(
     @Inject(SUBSCRIPTION_REPOSITORY_PORT)
     private readonly subscriptionRepository: SubscriptionRepositoryPort,
-  ) {}
+  ) {
+    super();
+  }
 
   async execute(
     query: GetMySubscriptionQuery,
   ): Promise<MySubscriptionResponse> {
     const userId = new UserId(query.userId);
-    const subscription =
-      await this.subscriptionRepository.findActiveByUserId(userId);
+    const now = new Date();
 
-    if (!subscription || subscription.endDate < new Date()) {
+    const allActive =
+      await this.subscriptionRepository.findAllActiveByUserId(userId);
+
+    // Tìm gói hiện đang chạy (now nằm trong khoảng start và end)
+    const currentSubscription = allActive.find(
+      (sub) => sub.startDate <= now && sub.endDate >= now,
+    );
+
+    // Nếu không có gói nào đang chạy nhưng có gói trong tương lai (đã stack)
+    // thì lấy gói sẽ bắt đầu sớm nhất
+    const subscription =
+      currentSubscription ||
+      (allActive.length > 0 ? allActive[allActive.length - 1] : null);
+
+    if (!subscription || (subscription.endDate < now && !currentSubscription)) {
       return {
         subscription: null,
         has_active_subscription: false,
@@ -43,9 +62,13 @@ export class GetMySubscriptionQueryHandler implements IQueryHandler<GetMySubscri
       };
     }
 
+    // Tính tổng số ngày còn lại dựa trên ngày kết thúc của gói xa nhất
+    const latestEndDate = allActive.reduce((latest, sub) => {
+      return sub.endDate > latest ? sub.endDate : latest;
+    }, subscription.endDate);
+
     const daysRemaining = Math.ceil(
-      (subscription.endDate.getTime() - new Date().getTime()) /
-        (1000 * 60 * 60 * 24),
+      (latestEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     return {

@@ -1,10 +1,11 @@
+import { UserId } from '@20206205tech/nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, Repository } from 'typeorm';
+import { EntityManager, LessThan, Repository } from 'typeorm';
 import { TransactionRepositoryPort } from '../../../application/ports/database/transaction.repository.port';
+import { PaymentStatus } from '../../../domain/value-objects/payment-status';
 import { Transaction } from '../../../domain/entities/transaction';
 import { TransactionId } from '../../../domain/value-objects/transaction-id';
-import { UserId } from '../../../domain/value-objects/user-id';
 import { TransactionEntity } from '../entities/transaction.entity';
 import { TransactionMapper } from '../mappers/transaction.mapper';
 
@@ -52,7 +53,7 @@ export class TransactionOrmRepository implements TransactionRepositoryPort {
   async findPendingExpired(timeoutDate: Date): Promise<Transaction[]> {
     const orms = await this.repo.find({
       where: {
-        paymentStatus: 'pending',
+        paymentStatus: PaymentStatus.PENDING,
         createdAt: LessThan(timeoutDate),
       },
       order: { createdAt: 'ASC' },
@@ -60,9 +61,10 @@ export class TransactionOrmRepository implements TransactionRepositoryPort {
     return orms.map((orm) => TransactionMapper.toDomain(orm));
   }
 
-  async save(transaction: Transaction): Promise<void> {
+  async save(transaction: Transaction, context?: EntityManager): Promise<void> {
+    const manager = context || this.repo.manager;
     const orm = TransactionMapper.toOrm(transaction);
-    await this.repo.save(orm);
+    await manager.save(orm);
   }
 
   async delete(id: TransactionId): Promise<void> {

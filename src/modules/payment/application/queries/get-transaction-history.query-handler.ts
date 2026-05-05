@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { UserId } from '../../domain/value-objects/user-id';
+import { QueryHandler } from '@nestjs/cqrs';
+import { BaseQueryHandler, UserId } from '@20206205tech/nestjs-common';
+
 import {
   TRANSACTION_REPOSITORY_PORT,
   type TransactionRepositoryPort,
@@ -20,11 +21,16 @@ export interface TransactionHistoryItem {
 }
 
 @QueryHandler(GetTransactionHistoryQuery)
-export class GetTransactionHistoryQueryHandler implements IQueryHandler<GetTransactionHistoryQuery> {
+export class GetTransactionHistoryQueryHandler extends BaseQueryHandler<
+  GetTransactionHistoryQuery,
+  TransactionHistoryItem[]
+> {
   constructor(
     @Inject(TRANSACTION_REPOSITORY_PORT)
     private readonly transactionRepository: TransactionRepositoryPort,
-  ) {}
+  ) {
+    super();
+  }
 
   async execute(
     query: GetTransactionHistoryQuery,

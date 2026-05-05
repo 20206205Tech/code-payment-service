@@ -1,0 +1,109 @@
+name: Test NestJS Application
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  install-deps:
+    runs-on: ubuntu-latest
+    outputs:
+      deps-cache-key: ${{ steps.cache-key.outputs.CACHE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Calculate cache key
+        id: cache-key
+        run: |
+          echo "CACHE_KEY=deps-node-modules-${{ hashFiles('package-lock.json') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Download cached dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}
+          restore-keys: |
+            deps-node-modules-
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+  ddd-check:
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Download cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ needs.install-deps.outputs.deps-cache-key }}
+
+      - name: Check DDD Architecture
+        run: npm run ddd:check
+
+  unit-test:
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Download cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ needs.install-deps.outputs.deps-cache-key }}
+
+      - name: Fetch secrets from Doppler
+        id: doppler
+        uses: dopplerhq/secrets-fetch-action@v1.2.0
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: 20206205tech
+          doppler-config: kong
+
+      - name: Test Coverage
+        run: npm run test:cov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ steps.doppler.outputs.CODECOV_TOKEN }}
+          directory: ./coverage
+          fail_ci_if_error: true
+
+  e2e-test:
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Download cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ needs.install-deps.outputs.deps-cache-key }}
+
+      - name: Test E2E
+        run: npm run test:e2e

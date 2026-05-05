@@ -9,7 +9,7 @@ import { CompressionTypes, Kafka, Producer } from 'kafkajs';
 import {
   MessageBrokerPort,
   SubscriptionPurchasedPayload,
-} from '../../application/ports/service/message-broker.port';
+} from '../../application/ports/messaging/message-broker.port';
 
 @Injectable()
 export class KafkaMessageBrokerAdapter

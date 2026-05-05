@@ -1,7 +1,14 @@
 import { ZalopayGatewayService } from './zalopay-gateway.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('ZalopayGatewayService', () => {
-  it('should be defined', () => {
-    expect(new ZalopayGatewayService()).toBeDefined();
+  it('should be defined when provided a ConfigService', () => {
+    const mockConfig = {
+      getOrThrow: jest.fn().mockReturnValue('mock-value'),
+      get: jest.fn().mockReturnValue('development'),
+    } as unknown as ConfigService;
+
+    const service = new ZalopayGatewayService(mockConfig);
+    expect(service).toBeDefined();
   });
 });

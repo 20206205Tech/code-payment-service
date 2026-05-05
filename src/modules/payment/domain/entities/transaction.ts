@@ -1,18 +1,9 @@
-// domain/entities/transaction.ts
-
-import { AggregateRoot } from '@nestjs/cqrs';
+import { UserId, BaseVersionAggregateRoot } from '@20206205tech/nestjs-common';
 import { Money } from '../value-objects/money';
 import { PlanId } from '../value-objects/plan-id';
 import { SubscriptionId } from '../value-objects/subscription-id';
 import { TransactionId } from '../value-objects/transaction-id';
-import { UserId } from '../value-objects/user-id';
-
-export type PaymentStatus =
-  | 'pending'
-  | 'success'
-  | 'failed'
-  | 'refunded'
-  | 'expired';
+import { PaymentStatus } from '../value-objects/payment-status';
 
 export interface TransactionProps {
   id: TransactionId;
@@ -30,9 +21,10 @@ export interface TransactionProps {
   paidAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  version?: number;
 }
 
-export class Transaction extends AggregateRoot {
+export class Transaction extends BaseVersionAggregateRoot {
   private readonly _transactionId: TransactionId;
   private readonly _userId: UserId;
   private readonly _subscriptionId: SubscriptionId;
@@ -50,7 +42,7 @@ export class Transaction extends AggregateRoot {
   private _updatedAt: Date;
 
   private constructor(props: TransactionProps) {
-    super();
+    super(props.id.value, props.version ?? 1, true, props.createdAt);
     this._transactionId = props.id;
     this._userId = props.userId;
     this._subscriptionId = props.subscriptionId;
@@ -89,12 +81,13 @@ export class Transaction extends AggregateRoot {
       finalAmount,
       transactionRef,
       paymentMethod,
-      paymentStatus: 'pending',
+      paymentStatus: PaymentStatus.PENDING,
       providerTransactionId: null,
       paymentMetadata,
       paidAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      version: 1,
     });
   }
 
@@ -103,16 +96,17 @@ export class Transaction extends AggregateRoot {
   }
 
   public markSuccess(): void {
-    this._paymentStatus = 'success';
+    this._paymentStatus = PaymentStatus.SUCCESS;
     this._updatedAt = new Date();
   }
 
   public markFailed(): void {
-    this._paymentStatus = 'failed';
+    this._paymentStatus = PaymentStatus.FAILED;
     this._updatedAt = new Date();
   }
+
   public markExpired(): void {
-    this._paymentStatus = 'expired';
+    this._paymentStatus = PaymentStatus.EXPIRED;
     this._updatedAt = new Date();
   }
 
@@ -132,10 +126,11 @@ export class Transaction extends AggregateRoot {
   }
 
   public isPending(): boolean {
-    return this._paymentStatus === 'pending';
+    return this._paymentStatus === PaymentStatus.PENDING;
   }
+
   public isSuccess(): boolean {
-    return this._paymentStatus === 'success';
+    return this._paymentStatus === PaymentStatus.SUCCESS;
   }
 
   get transactionId(): TransactionId {

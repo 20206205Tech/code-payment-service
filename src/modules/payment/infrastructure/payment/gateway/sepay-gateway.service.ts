@@ -2,11 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { PaymentProvider } from '../payment-provider.enum';
 import {
   IpnVerifyResult,
   PaymentGatewayPort,
   PaymentInput,
 } from '../../../application/ports/payment/payment-gateway.port';
+import { getPaymentCallbackUrl, getPaymentReturnUrl } from './url-helper';
 
 @Injectable()
 export class SepayGatewayService implements PaymentGatewayPort {
@@ -30,15 +32,20 @@ export class SepayGatewayService implements PaymentGatewayPort {
       'PAYMENT_SEPAY_ENDPOINT',
       'https://pay.sepay.vn/v1/checkout/init',
     );
-    this.redirectUrl =
-      this.configService.getOrThrow<string>('PAYMENT_RETURN_URL');
-    this.ipnUrl = this.configService.getOrThrow<string>('PAYMENT_CALLBACK_URL');
+    this.redirectUrl = getPaymentReturnUrl(
+      this.configService,
+      PaymentProvider.SEPAY,
+    );
+    this.ipnUrl = getPaymentCallbackUrl(
+      this.configService,
+      PaymentProvider.SEPAY,
+    );
   }
 
   async createPaymentUrl(input: PaymentInput): Promise<string> {
-    const successUrl = `${this.redirectUrl}/sepay`;
-    const errorUrl = `${this.redirectUrl}/sepay`;
-    const cancelUrl = `${this.redirectUrl}/sepay`;
+    const successUrl = this.redirectUrl;
+    const errorUrl = this.redirectUrl;
+    const cancelUrl = this.redirectUrl;
 
     const fields: Record<string, string> = {
       order_amount: Math.floor(input.amount).toString(),
@@ -151,6 +158,7 @@ export class SepayGatewayService implements PaymentGatewayPort {
             data.result_code === '0' ||
             String(data.success) === 'true'),
         txnRef: txnRef,
+        amount: data.order_amount ? Number(data.order_amount) : undefined,
         providerTransId: (data.transaction_id as string) || '',
         message: isValid ? 'Success' : 'Invalid Signature',
       });
@@ -168,6 +176,9 @@ export class SepayGatewayService implements PaymentGatewayPort {
         isValid: true, // Assuming validity if nested structure matches expected Webhook format
         isSuccess: true,
         txnRef: txnRef,
+        amount: orderData.order_amount
+          ? Number(orderData.order_amount)
+          : undefined,
         providerTransId: (transactionData.transaction_id as string) || '',
         message: 'Success (Webhook)',
       });

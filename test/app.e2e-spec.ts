@@ -1,25 +1,28 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { main } from './common/utils/main.util';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    app = await main(AppModule);
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
+  it('GET /', async () => {
+    const response = await request(app.getHttpServer() as unknown as string)
+      .get('/code-payment-service/')
       .expect(200)
-      .expect('Hello World!');
+      .expect('Content-Type', /json/);
+
+    expect(response.body).toEqual({
+      message: 'Hello World',
+      docs: '/code-payment-service/docs',
+    });
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });

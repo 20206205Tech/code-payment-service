@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   UserProfile,
   UserProfilePort,
-} from '../../application/ports/services/user-profile.port';
+} from '../../application/ports/service/user-profile.port';
 
 @Injectable()
 export class SupabaseUserProfileService implements UserProfilePort {

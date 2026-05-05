@@ -28,4 +28,7 @@ export class PlanEntity {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ name: 'version', type: 'int', default: 1 })
+  version: number;
 }

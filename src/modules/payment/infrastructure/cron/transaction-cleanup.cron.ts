@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   TRANSACTION_REPOSITORY_PORT,
@@ -9,6 +8,8 @@ import {
   SUBSCRIPTION_REPOSITORY_PORT,
   type SubscriptionRepositoryPort,
 } from '../../application/ports/database/subscription.repository.port';
+import { SubscriptionStatus } from '../../domain/value-objects/subscription-status';
+import { PAYMENT_TIMEOUT_MS } from '../../domain/value-objects/constants';
 
 @Injectable()
 export class TransactionCleanupCron {
@@ -19,7 +20,6 @@ export class TransactionCleanupCron {
     private readonly transactionRepository: TransactionRepositoryPort,
     @Inject(SUBSCRIPTION_REPOSITORY_PORT)
     private readonly subscriptionRepository: SubscriptionRepositoryPort,
-    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -30,10 +30,7 @@ export class TransactionCleanupCron {
   async handleStaleTransactions(): Promise<void> {
     this.logger.log('Bắt đầu quét các giao dịch PENDING quá hạn...');
 
-    const timeoutMs = Number(
-      this.configService.getOrThrow('PAYMENT_TIMEOUT_MS'),
-    );
-    const thresholdDate = new Date(Date.now() - timeoutMs);
+    const thresholdDate = new Date(Date.now() - PAYMENT_TIMEOUT_MS);
 
     const staleTransactions =
       await this.transactionRepository.findPendingExpired(thresholdDate);
@@ -58,7 +55,10 @@ export class TransactionCleanupCron {
           transaction.subscriptionId,
         );
 
-        if (subscription && subscription.status === 'pending') {
+        if (
+          subscription &&
+          subscription.status === SubscriptionStatus.PENDING
+        ) {
           subscription.expire();
           await this.subscriptionRepository.save(subscription);
           this.logger.log(

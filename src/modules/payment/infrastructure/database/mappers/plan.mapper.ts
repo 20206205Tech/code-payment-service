@@ -13,6 +13,7 @@ export class PlanMapper {
       isActive: orm.isActive,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
+      version: orm.version,
     });
   }
 
@@ -25,6 +26,7 @@ export class PlanMapper {
     orm.isActive = domain.isActive;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;
+    orm.version = domain.version.value;
     return orm;
   }
 }

@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { PAYMENT_QUEUE } from './constants';
+import { Module } from '@nestjs/common';
 import { PaymentApi } from './api/payment.api';
 import { PaymentApplication } from './application/payment.application';
+import { PAYMENT_QUEUE } from './domain/value-objects/constants';
 import { PaymentInfrastructure } from './infrastructure/payment.infrastructure';
 
 @Module({

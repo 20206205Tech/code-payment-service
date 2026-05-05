@@ -1,4 +1,4 @@
-import { BaseId } from '../../../common/domain/value-objects/base-id';
+import { BaseId } from '@20206205tech/nestjs-common';
 
 export class PlanId extends BaseId {
   public static create(): PlanId {

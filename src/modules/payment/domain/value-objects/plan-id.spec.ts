@@ -1,30 +1,39 @@
 import { PlanId } from './plan-id';
 
+const VALID_UUID = '550e8400-e29b-41d4-a716-446655440000';
+
 describe('PlanId', () => {
-  const validUuid = '123e4567-e89b-12d3-a456-426614174000';
-
-  it('should create an instance with a valid UUID', () => {
-    const planId = new PlanId(validUuid);
-    expect(planId).toBeDefined();
-    expect(planId.value).toBe(validUuid);
+  it('should create PlanId with a valid UUID', () => {
+    const id = new PlanId(VALID_UUID);
+    expect(id.value).toBe(VALID_UUID);
   });
 
-  it('should generate a new instance using the create() factory method', () => {
-    const planId = PlanId.create();
-    expect(planId).toBeDefined();
-    // Đảm bảo value được sinh ra là một string không rỗng
-    expect(typeof planId.value).toBe('string');
-    expect(planId.value.length).toBeGreaterThan(0);
+  it('should throw for an invalid UUID', () => {
+    expect(() => new PlanId('not-valid')).toThrow('Invalid ID format');
   });
 
-  describe('equals()', () => {
-    it('should correctly evaluate equality between PlanIds', () => {
-      const id1 = new PlanId(validUuid);
-      const id2 = new PlanId(validUuid);
-      const id3 = PlanId.create();
+  it('PlanId.create() should generate a valid UUID', () => {
+    const id = PlanId.create();
+    expect(id.value).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+  });
 
-      expect(id1.equals(id2)).toBe(true);
-      expect(id1.equals(id3)).toBe(false);
-    });
+  it('two created PlanIds should be unique', () => {
+    const a = PlanId.create();
+    const b = PlanId.create();
+    expect(a.value).not.toBe(b.value);
+  });
+
+  it('should be equal when values match', () => {
+    const a = new PlanId(VALID_UUID);
+    const b = new PlanId(VALID_UUID);
+    expect(a.equals(b)).toBe(true);
+  });
+
+  it('should not be equal when values differ', () => {
+    const a = PlanId.create();
+    const b = PlanId.create();
+    expect(a.equals(b)).toBe(false);
   });
 });

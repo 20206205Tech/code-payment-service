@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import {
   MESSAGE_BROKER_PORT,
   type MessageBrokerPort,
-} from '../../application/ports/service/message-broker.port';
+} from '../../application/ports/messaging/message-broker.port';
 import { OutboxEntity } from '../database/entities/outbox.entity';
 
 interface SubscriptionPurchasedOutboxPayload {
@@ -14,6 +14,7 @@ interface SubscriptionPurchasedOutboxPayload {
   planId: string;
   startDate: string | number | Date;
   endDate: string | number | Date;
+  version: number;
 }
 
 @Injectable()
@@ -55,7 +56,9 @@ export class OutboxRelayCron {
               planId: payload.planId,
               startDate: new Date(payload.startDate),
               endDate: new Date(payload.endDate),
+              version: payload.version,
             });
+
             break;
           }
 

@@ -1,6 +1,6 @@
+import { UserId } from '@20206205tech/nestjs-common';
 import { Transaction } from '../../../domain/entities/transaction';
 import { TransactionId } from '../../../domain/value-objects/transaction-id';
-import { UserId } from '../../../domain/value-objects/user-id';
 
 export const TRANSACTION_REPOSITORY_PORT = Symbol(
   'TRANSACTION_REPOSITORY_PORT',
@@ -16,6 +16,6 @@ export interface TransactionRepositoryPort {
     limit?: number,
   ): Promise<Transaction[]>;
   findPendingExpired(timeoutDate: Date): Promise<Transaction[]>;
-  save(transaction: Transaction): Promise<void>;
+  save(transaction: Transaction, context?: any): Promise<void>;
   delete(id: TransactionId): Promise<void>;
 }

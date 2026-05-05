@@ -1,3 +1,4 @@
+import { BaseVersionAggregateRoot } from '@20206205tech/nestjs-common';
 import { Money } from '../value-objects/money';
 import { PlanId } from '../value-objects/plan-id';
 
@@ -9,9 +10,10 @@ export interface PlanProps {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  version?: number;
 }
 
-export class Plan {
+export class Plan extends BaseVersionAggregateRoot {
   private readonly _planId: PlanId;
   private _name: string;
   private _durationMonths: number;
@@ -21,6 +23,7 @@ export class Plan {
   private _updatedAt: Date;
 
   private constructor(props: PlanProps) {
+    super(props.id.value, props.version ?? 1, true, props.createdAt);
     this._planId = props.id;
     this._name = props.name;
     this._durationMonths = props.durationMonths;
@@ -44,6 +47,7 @@ export class Plan {
       isActive,
       createdAt: new Date(),
       updatedAt: new Date(),
+      version: 1,
     });
   }
 
@@ -51,20 +55,7 @@ export class Plan {
     return new Plan(props);
   }
 
-  // public update(
-  //   name?: string,
-  //   durationMonths?: number,
-  //   price?: Money,
-  //   isActive?: boolean,
-  // ): void {
-  //   if (name !== undefined) this._name = name;
-  //   if (durationMonths !== undefined) this._durationMonths = durationMonths;
-  //   if (price !== undefined) this._price = price;
-  //   if (isActive !== undefined) this._isActive = isActive;
-  //   this._updatedAt = new Date();
-  // }
-
-  public deactivate(): void {
+  public archive(): void {
     this._isActive = false;
     this._updatedAt = new Date();
   }

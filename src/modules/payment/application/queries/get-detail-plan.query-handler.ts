@@ -1,6 +1,7 @@
-import { Inject, NotFoundException } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
 import { QueryHandler } from '@nestjs/cqrs';
-import { BaseQueryHandler } from '../../../common/application/queries/base.query-handler';
+import { BaseQueryHandler } from '@20206205tech/nestjs-common';
 import { PlanId } from '../../domain/value-objects/plan-id';
 import {
   PLAN_REPOSITORY_PORT,
@@ -21,7 +22,7 @@ export class GetDetailPlanQueryHandler extends BaseQueryHandler<GetDetailPlanQue
   async execute(query: GetDetailPlanQuery): Promise<PlanResponseItem> {
     const planId = new PlanId(query.planId);
     const plan = await this.planRepository.findById(planId);
-    if (!plan) throw new NotFoundException('Không tìm thấy gói dịch vụ');
+    if (!plan) throw new PlanNotFoundException(planId.value);
     return {
       id: plan.planId.value,
       name: plan.name,
