@@ -1,8 +1,0 @@
-services:
-  payment-service:
-    container_name: payment-service
-    image: payment-service:latest
-    ports:
-      - '30004:30004'
-    env_file:
-      - .env

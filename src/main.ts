@@ -16,7 +16,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const ENVIRONMENT = process.env.ENVIRONMENT ?? 'production';
-  const PORT = process.env.PORT ?? 30001;
+  const PORT = process.env.PORT ?? 33001;
   const SERVICE_NAME = 'code-payment-service';
 
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
