@@ -16,8 +16,8 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const ENVIRONMENT = process.env.ENVIRONMENT ?? 'production';
-  const PORT = process.env.PORT ?? 33001;
   const SERVICE_NAME = 'code-payment-service';
+  const PORT = process.env.PORT ?? 33001;
 
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
 
@@ -38,8 +38,6 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix(`${SERVICE_NAME}`);
-
-  // Đăng ký Global Exception Filter
   app.useGlobalFilters(new DomainExceptionFilter());
 
   app.useGlobalPipes(
