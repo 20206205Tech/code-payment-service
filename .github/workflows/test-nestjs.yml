@@ -77,7 +77,7 @@ jobs:
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           doppler-project: 20206205tech
-          doppler-config: kong
+          doppler-config: prod
 
       - name: Test Coverage
         run: npm run test:cov
