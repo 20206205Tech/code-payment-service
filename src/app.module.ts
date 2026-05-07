@@ -1,12 +1,12 @@
+import { AuthModule } from '@20206205tech/nestjs-common';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { AuthModule } from '@20206205tech/nestjs-common';
-import { PaymentModule } from './modules/payment/payment.module';
 import { LoggerModule } from './modules/logger/logger.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -43,9 +43,14 @@ import { LoggerModule } from './modules/logger/logger.module';
           ssl:
             configService.getOrThrow<string>('ENVIRONMENT') === 'test'
               ? false
-              : { rejectUnauthorized: false }, // Cho phép chứng chỉ tự ký (self-signed)
-          max: 10, // Tăng giới hạn connection để tránh timeout khi có nhiều tiến trình (API + Cron)
-          connectionTimeoutMillis: 5000, // Timeout kết nối sau 5s
+              : { rejectUnauthorized: false },
+          max: 10,
+          // Tăng thời gian chờ lên 15s để Neon có đủ thời gian "thức dậy" (cold start)
+          connectionTimeoutMillis: 15000,
+          // Bật keepAlive và đưa cấu hình ra cùng cấp với max, connectionTimeoutMillis
+          keepAlive: true,
+          keepAliveInitialDelayMillis: 10000,
+          idleTimeoutMillis: 30000,
         },
       }),
     }),

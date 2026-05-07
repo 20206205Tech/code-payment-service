@@ -22,12 +22,13 @@ async function bootstrap() {
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
 
   let DESCRIPTION = '';
-  DESCRIPTION += `# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})\n`;
+  DESCRIPTION += `# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})\n\n`;
   DESCRIPTION += `* [Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)\n`;
+  DESCRIPTION += `* [Database](https://console.neon.tech/app/org-still-feather-82034197/projects?q=${SERVICE_NAME})\n`;
   DESCRIPTION += `* [Local](http://localhost:${PORT}/${SERVICE_NAME})\n`;
   DESCRIPTION += `* [Dev](https://dev-${SERVICE_NAME}.20206205.tech/${SERVICE_NAME})\n`;
-  DESCRIPTION = DESCRIPTION.trim();
 
+  DESCRIPTION = DESCRIPTION.trim();
   Logger.debug(`DESCRIPTION: \n${DESCRIPTION}`);
 
   const app = await NestFactory.create(AppModule, {
