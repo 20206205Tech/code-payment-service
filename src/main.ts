@@ -20,9 +20,12 @@ async function bootstrap() {
   const PORT = process.env.PORT ?? 33001;
 
   const SUPABASE_PROJECT_ID = process.env.SUPABASE_PROJECT_ID;
+  const PAYMENT_DEFAULT_PROVIDER = process.env.PAYMENT_DEFAULT_PROVIDER;
 
   let DESCRIPTION = '';
   DESCRIPTION += `# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})\n\n`;
+
+  DESCRIPTION += `* [PAYMENT_DEFAULT_PROVIDER](${PAYMENT_DEFAULT_PROVIDER})\n`;
   DESCRIPTION += `* [Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google)\n`;
   DESCRIPTION += `* [Database](https://console.neon.tech/app/org-still-feather-82034197/projects?q=${SERVICE_NAME})\n`;
   DESCRIPTION += `* [Local](http://localhost:${PORT}/${SERVICE_NAME})\n`;
