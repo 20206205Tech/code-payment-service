@@ -28,7 +28,11 @@ export class OutboxRelayCron {
     private readonly messageBroker: MessageBrokerPort,
   ) {}
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(
+    process.env.NODE_ENV === 'production'
+      ? CronExpression.EVERY_5_SECONDS
+      : CronExpression.EVERY_5_MINUTES,
+  )
   async processOutboxMessages() {
     // 1. Lấy ra các message đang chờ xử lý
     const pendingMessages = await this.outboxRepo.find({
