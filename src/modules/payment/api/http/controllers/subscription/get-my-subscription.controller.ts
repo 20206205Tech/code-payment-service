@@ -12,7 +12,7 @@ import { GetMySubscriptionResponseDto } from '../../dto/response/get-my-subscrip
 export class GetMySubscriptionController {
   constructor(private readonly queryBus: QueryBus) {}
 
-  @Get('me')
+  @Get('')
   @Auth.User()
   async execute(
     @CurrentUser() user: JwtPayload,
