@@ -50,8 +50,8 @@ export const PaymentGatewayInfrastructure = {
         ),
         vnpayHost: configService.getOrThrow<string>(
           'PAYMENT_VNPAY_PAYMENT_URL',
-        ),
-        testMode: process.env.ENVIRONMENT === 'development',
+        ),testMode:true 
+      //  testMode: process.env.ENVIRONMENT === 'development',
       }),
     }),
   ],
