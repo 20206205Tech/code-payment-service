@@ -15,6 +15,7 @@ import {
   PaymentInput,
 } from '../../../application/ports/payment/payment-gateway.port';
 import { getPaymentReturnUrl } from './url-helper';
+import { PAYMENT_TIMEOUT_MS } from '../../../domain/value-objects/constants';
 
 @Injectable()
 export class VnpayGatewayService implements PaymentGatewayPort {
@@ -27,7 +28,7 @@ export class VnpayGatewayService implements PaymentGatewayPort {
   createPaymentUrl(input: PaymentInput): Promise<string> {
     const createDate = new Date();
     const expireDate = new Date();
-    expireDate.setMinutes(createDate.getMinutes() + 5);
+    expireDate.setMinutes(createDate.getMinutes() + PAYMENT_TIMEOUT_MS / 60000);
 
     const returnUrl = getPaymentReturnUrl(
       this.configService,
