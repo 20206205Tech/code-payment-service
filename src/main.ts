@@ -4,6 +4,7 @@ initTracing();
 import {
   DomainExceptionFilter,
   SWAGGER_AUTH_KEY,
+  SWAGGER_DOCS_PATH,
 } from '@20206205tech/nestjs-common';
 import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -73,7 +74,7 @@ async function bootstrap() {
   };
 
   SwaggerModule.setup(
-    `${SERVICE_NAME}/docs`,
+    `${SERVICE_NAME}/${SWAGGER_DOCS_PATH}`,
     app,
     documentFactory,
     customOptions,

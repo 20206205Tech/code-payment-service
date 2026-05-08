@@ -35,7 +35,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@20206205tech/nestjs-common": "^0.9.0",
+    "@20206205tech/nestjs-common": "^0.10.0",
     "@getbrevo/brevo": "^5.0.4",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.4",
