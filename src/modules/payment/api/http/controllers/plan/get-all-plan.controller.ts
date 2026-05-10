@@ -1,4 +1,5 @@
-import { Auth, BaseController } from '@20206205tech/nestjs-common';
+import { Auth } from '@20206205tech/nestjs-auth';
+import { BaseController } from '@20206205tech/nestjs-common';
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { GetAllPlanQuery } from '../../../../application/queries/get-all-plan.query';

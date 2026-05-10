@@ -1,4 +1,4 @@
-import { AuthModule } from '@20206205tech/nestjs-common';
+import { AuthModule } from '@20206205tech/nestjs-auth';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';

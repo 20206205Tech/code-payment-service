@@ -1,11 +1,8 @@
 import { initTracing } from './tracing';
 initTracing();
 
-import {
-  DomainExceptionFilter,
-  SWAGGER_AUTH_KEY,
-  SWAGGER_DOCS_PATH,
-} from '@20206205tech/nestjs-common';
+import { SWAGGER_AUTH_KEY, SWAGGER_DOCS_PATH } from '@20206205tech/nestjs-auth';
+import { DomainExceptionFilter } from '@20206205tech/nestjs-common';
 import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
