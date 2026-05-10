@@ -1,4 +1,4 @@
-import { Auth } from '@20206205tech/nestjs-common';
+import { Auth } from '@20206205tech/nestjs-auth';
 import { Controller, Param, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';

@@ -1,4 +1,4 @@
-import { Auth, CurrentUserId } from '@20206205tech/nestjs-common';
+import { Auth, CurrentUserId } from '@20206205tech/nestjs-auth';
 import { Controller, Get, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';

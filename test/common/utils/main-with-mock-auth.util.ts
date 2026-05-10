@@ -1,7 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DomainExceptionFilter } from '@20206205tech/nestjs-common';
 import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard, RolesGuard } from '@20206205tech/nestjs-common';
+import { JwtAuthGuard, RolesGuard } from '@20206205tech/nestjs-auth';
 import { MockJwtAuthGuard, MockRolesGuard } from '../guards/mock-auth.guard';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MESSAGE_BROKER_PORT } from '../../../src/modules/payment/application/ports/messaging/message-broker.port';

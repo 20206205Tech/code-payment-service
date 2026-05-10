@@ -1,5 +1,5 @@
-import type { JwtPayload } from '@20206205tech/nestjs-common';
-import { Auth, CurrentUser } from '@20206205tech/nestjs-common';
+import type { JwtPayload } from '@20206205tech/nestjs-auth';
+import { Auth, CurrentUser } from '@20206205tech/nestjs-auth';
 import { Controller, Get } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';

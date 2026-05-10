@@ -1,4 +1,5 @@
-import { Auth, BaseController } from '@20206205tech/nestjs-common';
+import { Auth } from '@20206205tech/nestjs-auth';
+import { BaseController } from '@20206205tech/nestjs-common';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
