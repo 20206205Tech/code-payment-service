@@ -80,9 +80,9 @@ function seedSecrets(): void {
 
   // Email
   process.env.BREVO_API_KEY = 'test-brevo-key';
-  process.env.EMAIL_NAME = 'Test Sender';
-  process.env.EMAIL_ADDRESS = 'test@sender.com';
-  process.env.EMAIL_ADDRESS_DEV = 'dev@test.com';
+  // process.env.EMAIL_NAME = 'Test Sender';
+  // process.env.EMAIL_ADDRESS = 'test@sender.com';
+  // process.env.EMAIL_ADDRESS_DEV = 'dev@test.com';
 
   // Môi trường test
   process.env.ENVIRONMENT = 'test';

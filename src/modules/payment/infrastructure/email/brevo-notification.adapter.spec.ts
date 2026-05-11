@@ -22,9 +22,11 @@ describe('BrevoNotificationAdapter', () => {
     configService = {
       getOrThrow: jest.fn((key: string) => {
         if (key === 'BREVO_API_KEY') return 'api-key';
+        return '';
+      }),
+      get: jest.fn((key: string) => {
         if (key === 'EMAIL_NAME') return 'AI Chatbot';
         if (key === 'EMAIL_ADDRESS') return 'no-reply@test.com';
-        if (key === 'EMAIL_ADDRESS_DEV') return 'dev@test.com';
         return '';
       }),
     } as unknown as jest.Mocked<ConfigService>;

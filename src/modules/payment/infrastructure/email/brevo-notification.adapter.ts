@@ -9,16 +9,22 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
   private client: BrevoClient;
   private readonly senderName: string;
   private readonly senderEmail: string;
-  private readonly emailAddressDev: string;
+  // private readonly emailAddressDev: string;
 
   constructor(private readonly configService: ConfigService) {
     this.client = new BrevoClient({
       apiKey: this.configService.getOrThrow<string>('BREVO_API_KEY'),
     });
-    this.senderName = this.configService.getOrThrow<string>('EMAIL_NAME');
-    this.senderEmail = this.configService.getOrThrow<string>('EMAIL_ADDRESS');
-    this.emailAddressDev =
-      this.configService.getOrThrow<string>('EMAIL_ADDRESS_DEV');
+    // this.senderName = this.configService.getOrThrow<string>('EMAIL_NAME');
+    // this.senderEmail = this.configService.getOrThrow<string>('EMAIL_ADDRESS');
+    this.senderName =
+      this.configService.get<string>('EMAIL_NAME') ||
+      '(20206205.tech) AI Chatbot - Support';
+    this.senderEmail =
+      this.configService.get<string>('EMAIL_ADDRESS') ||
+      'support@20206205.tech';
+    // this.emailAddressDev =
+    //   this.configService.getOrThrow<string>('EMAIL_ADDRESS_DEV');
   }
 
   async sendPaymentSuccessEmail(
@@ -29,7 +35,7 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
   ): Promise<void> {
     try {
       if (process.env.ENVIRONMENT === 'development') {
-        email = this.emailAddressDev || email;
+        // email = this.emailAddressDev || email;
         this.logger.debug(
           `Development mode: Overriding recipient email to ${email} for testing purposes.`,
         );
@@ -71,7 +77,7 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
   ): Promise<void> {
     try {
       if (process.env.ENVIRONMENT === 'development') {
-        email = this.emailAddressDev || email;
+        // email = this.emailAddressDev || email;
       }
 
       const response = await this.client.transactionalEmails.sendTransacEmail({
@@ -113,7 +119,7 @@ export class BrevoNotificationAdapter implements EmailSenderPort {
   ): Promise<void> {
     try {
       if (process.env.ENVIRONMENT === 'development') {
-        email = this.emailAddressDev || email;
+        // email = this.emailAddressDev || email;
       }
 
       const response = await this.client.transactionalEmails.sendTransacEmail({
