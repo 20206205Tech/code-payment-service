@@ -47,7 +47,6 @@ function makePendingSubscription(): Subscription {
     createdAt: now,
     updatedAt: now,
     version: 1,
-    version: 1,
   });
 }
 

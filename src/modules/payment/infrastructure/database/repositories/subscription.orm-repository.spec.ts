@@ -123,7 +123,6 @@ describe('SubscriptionOrmRepository', () => {
         createdAt: now,
         updatedAt: now,
         version: 1,
-        version: 1,
       });
       await repo.save(sub);
       expect(mockTypeOrmRepo.manager.save).toHaveBeenCalledTimes(1);
