@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
 
   ddd-check:
     runs-on: ubuntu-latest
@@ -59,7 +59,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: install-deps
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -88,6 +92,12 @@ jobs:
           token: ${{ steps.doppler.outputs.CODECOV_TOKEN }}
           directory: ./coverage
           fail_ci_if_error: true
+
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ steps.doppler.outputs.SONAR_TOKEN }}
 
   e2e-test:
     runs-on: ubuntu-latest
