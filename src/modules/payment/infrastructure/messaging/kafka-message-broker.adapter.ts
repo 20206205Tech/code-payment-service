@@ -57,7 +57,7 @@ export class KafkaMessageBrokerAdapter
 
   async onModuleInit(): Promise<void> {
     await this.producer.connect();
-    this.logger.log('Kafka producer connected to Aiven');
+    this.logger.debug('Kafka producer connected to Aiven');
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -85,7 +85,8 @@ export class KafkaMessageBrokerAdapter
     });
 
     this.logger.log(
-      `📨 Kafka [${KafkaMessageBrokerAdapter.TOPIC_SUBSCRIPTION_PURCHASED}]: published for userId=${payload.userId}, subscriptionId=${payload.subscriptionId}`,
+      `📨 Kafka [${KafkaMessageBrokerAdapter.TOPIC_SUBSCRIPTION_PURCHASED}]: published for payload=${JSON.stringify(payload)}`,
+      // `📨 Kafka [${KafkaMessageBrokerAdapter.TOPIC_SUBSCRIPTION_PURCHASED}]: published for userId=${payload.userId}, subscriptionId=${payload.subscriptionId}`,
     );
   }
 }

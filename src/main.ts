@@ -25,7 +25,7 @@ async function bootstrap() {
 
   DESCRIPTION += `* **PAYMENT_DEFAULT_PROVIDER = ${PAYMENT_DEFAULT_PROVIDER}**\n\n`;
 
-  DESCRIPTION += `* [Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://20206205tech.github.io/auth-callback)\n`;
+  DESCRIPTION += `* [Đăng nhập Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://20206205tech.github.io/auth-callback)\n`;
   DESCRIPTION += `* [Database](https://console.neon.tech/app/org-still-feather-82034197/projects?q=${SERVICE_NAME})\n`;
   DESCRIPTION += `* [Local](http://localhost:${PORT}/${SERVICE_NAME})\n`;
   DESCRIPTION += `* [Dev](https://dev-${SERVICE_NAME}.20206205.tech/${SERVICE_NAME})\n`;

@@ -34,7 +34,6 @@ export class OutboxRelayCron {
       : CronExpression.EVERY_5_MINUTES,
   )
   async processOutboxMessages() {
-    // 1. Lấy ra các message đang chờ xử lý
     const pendingMessages = await this.outboxRepo.find({
       where: { status: 'PENDING' },
       take: 50,
@@ -47,10 +46,8 @@ export class OutboxRelayCron {
       `📤 Outbox: Tìm thấy ${pendingMessages.length} tin nhắn đang chờ gửi.`,
     );
 
-    // 2. Lặp và gửi từng message
     for (const msg of pendingMessages) {
       try {
-        // Router định tuyến dựa theo Event Type
         switch (msg.eventType) {
           case 'SubscriptionPurchasedEvent': {
             const payload = msg.payload as SubscriptionPurchasedOutboxPayload;
@@ -72,13 +69,11 @@ export class OutboxRelayCron {
             );
         }
 
-        // 3. Đánh dấu đã gửi thành công
         msg.status = 'DONE';
         await this.outboxRepo.save(msg);
       } catch (error) {
         this.logger.error(`❌ Gửi message ID ${msg.id} thất bại:`, error);
 
-        // Cập nhật thành FAILED để có thể debug hoặc có logic retry (thử lại) sau
         msg.status = 'FAILED';
         await this.outboxRepo.save(msg);
       }
