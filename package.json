@@ -68,7 +68,7 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.1.23",
-    "@testcontainers/kafka": "^11.14.0",
+    "@testcontainers/kafka": "^12.0.1",
     "@testcontainers/postgresql": "^11.14.0",
     "@testcontainers/redis": "^12.0.0",
     "@types/cron": "^2.0.1",
