@@ -1,0 +1,20 @@
+strict digraph "dependency-cruiser output"{
+    rankdir="LR" splines="true" overlap="false" nodesep="0.16" ranksep="0.18" fontname="Helvetica-bold" fontsize="9" style="rounded,bold,filled" fillcolor="#ffffff" compound="true"
+    node [shape="box" style="rounded, filled" height="0.2" color="black" fillcolor="#ffffcc" fontcolor="black" fontname="Helvetica" fontsize="9"]
+    edge [arrowhead="normal" arrowsize="0.6" penwidth="2.0" color="#00000033" fontname="Helvetica" fontsize="9"]
+
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" "src/modules/payment/api" [label=<api> tooltip="api" URL="src/modules/payment/api" shape="box3d"] } } }
+    "src/modules/payment/api" -> "src/modules/payment/application"
+    "src/modules/payment/api" -> "src/modules/payment/infrastructure"
+    "src/modules/payment/api" -> "src/modules/payment/domain"
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" "src/modules/payment/application" [label=<application> tooltip="application" URL="src/modules/payment/application" shape="box3d"] } } }
+    "src/modules/payment/application" -> "src/modules/payment/domain"
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" "src/modules/payment/domain" [label=<domain> tooltip="domain" URL="src/modules/payment/domain" shape="box3d"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" "src/modules/payment/infrastructure" [label=<infrastructure> tooltip="infrastructure" URL="src/modules/payment/infrastructure" shape="box3d"] } } }
+    "src/modules/payment/infrastructure" -> "src/modules/payment/application"
+    "src/modules/payment/infrastructure" -> "src/modules/payment/domain"
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" "src/modules/payment/payment.module.ts" [label=<payment.module.ts> tooltip="payment.module.ts" URL="src/modules/payment/payment.module.ts" fillcolor="#eeeeee" style="filled" shape="folder"] } } }
+    "src/modules/payment/payment.module.ts" -> "src/modules/payment/api"
+    "src/modules/payment/payment.module.ts" -> "src/modules/payment/application"
+    "src/modules/payment/payment.module.ts" -> "src/modules/payment/infrastructure"
+}

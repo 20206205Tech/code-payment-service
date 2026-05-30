@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Khởi động dự án",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Bước 1: Cài đặt Dependencies",
+        "Bước 2: Cấu hình Doppler",
+        "Bước 3: Chạy NestJS Dev"
+      ],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "Bước 1: Cài đặt Dependencies",
+      "type": "shell",
+      "command": "if [ \"$TERM_PROGRAM\" = \"vscode\" ]; then npm install; else exit 0; fi",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Bước 2: Cấu hình Doppler",
+      "type": "shell",
+      "command": "if [ \"$TERM_PROGRAM\" = \"vscode\" ]; then doppler setup --project 20206205tech --config dev; else exit 0; fi",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Bước 3: Chạy NestJS Dev",
+      "type": "shell",
+      "command": "if [ \"$TERM_PROGRAM\" = \"vscode\" ]; then doppler run -- npm run start:dev; else exit 0; fi",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "app-group"
+      }
+    }
+  ]
+}
