@@ -3,12 +3,12 @@ import { GetTransactionHistoryController } from './get-transaction-history.contr
 
 describe('GetTransactionHistoryController', () => {
   let controller: GetTransactionHistoryController;
-  const mockCommandBus = {
+  const mockCommandBus: Pick<CommandBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<CommandBus>;
-  const mockQueryBus = {
+  };
+  const mockQueryBus: Pick<QueryBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<QueryBus>;
+  };
 
   beforeEach(() => {
     controller = new GetTransactionHistoryController(

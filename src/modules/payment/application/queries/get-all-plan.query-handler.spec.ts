@@ -1,19 +1,25 @@
-/* eslint-disable @typescript-eslint/unbound-method */
-import { GetAllPlanQueryHandler } from './get-all-plan.query-handler';
-import { GetAllPlanQuery } from './get-all-plan.query';
 import { Plan } from '../../domain/entities/plan';
 import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanName } from '../../domain/value-objects/plan-name';
 import { PlanRepositoryPort } from '../ports/database/plan.repository.port';
+import { GetAllPlanQuery } from './get-all-plan.query';
+import { GetAllPlanQueryHandler } from './get-all-plan.query-handler';
 
 function makeActivePlan(name: string, price: number): Plan {
-  return Plan.create(name, 1, new Money(price), true);
+  return Plan.create(
+    new PlanName(name),
+    new PlanDurationMonths(1),
+    new Money(price),
+    true,
+  );
 }
 
 const mockPlanRepo = {
   findById: jest.fn(),
   findAllActive: jest.fn(),
   save: jest.fn(),
-} as unknown as jest.Mocked<PlanRepositoryPort>;
+} satisfies Pick<PlanRepositoryPort, 'findAllActive'>;
 
 describe('GetAllPlanQueryHandler', () => {
   let handler: GetAllPlanQueryHandler;
@@ -58,7 +64,7 @@ describe('GetAllPlanQueryHandler', () => {
   });
 
   it('should include id field as UUID string', async () => {
-    const plan = makeActivePlan('X', 1000);
+    const plan = makeActivePlan('Xxx', 1000);
     mockPlanRepo.findAllActive.mockResolvedValue([plan]);
     const result = await handler.execute(new GetAllPlanQuery());
     expect(result[0].id).toMatch(

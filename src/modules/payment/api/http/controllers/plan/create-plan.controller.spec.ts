@@ -3,12 +3,12 @@ import { CreatePlanController } from './create-plan.controller';
 
 describe('CreatePlanController', () => {
   let controller: CreatePlanController;
-  const mockCommandBus = {
+  const mockCommandBus: Pick<CommandBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<CommandBus>;
-  const mockQueryBus = {
+  };
+  const mockQueryBus: Pick<QueryBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<QueryBus>;
+  };
 
   beforeEach(() => {
     controller = new CreatePlanController(mockCommandBus, mockQueryBus);

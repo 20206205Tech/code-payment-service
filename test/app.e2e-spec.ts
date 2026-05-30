@@ -11,7 +11,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('GET /', async () => {
-    const response = await request(app.getHttpServer() as unknown as string)
+    const response = await request(app.getHttpServer())
       .get('/code-payment-service/')
       .expect(200)
       .expect('Content-Type', /json/);

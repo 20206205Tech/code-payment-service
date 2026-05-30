@@ -14,7 +14,7 @@ describe('ArchivePlanController (e2e)', () => {
     app = await mainWithMockAuth(AppModule);
 
     // Create a plan to archive
-    const res = await request(app.getHttpServer() as unknown as string)
+    const res = await request(app.getHttpServer())
       .post('/code-payment-service/plans')
       .set(adminHeader())
       .send({ name: 'To Archive', durationMonths: 1, price: 50000 });
@@ -29,13 +29,13 @@ describe('ArchivePlanController (e2e)', () => {
 
   describe('DELETE /plans/:id', () => {
     it('should archive plan successfully as admin', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .delete(`/code-payment-service/plans/${planId}`)
         .set(adminHeader())
         .expect(200);
 
       // Verify it is archived (should return 404 now or be filtered from list)
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .get(`/code-payment-service/plans/${planId}`)
         .expect(200);
 

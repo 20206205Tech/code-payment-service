@@ -8,7 +8,9 @@ import { Plan } from '../../domain/entities/plan';
 import { Transaction } from '../../domain/entities/transaction';
 import { SubscriptionPurchasedEvent } from '../../domain/events/subscription-purchased.event';
 import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
 import { PlanId } from '../../domain/value-objects/plan-id';
+import { PlanName } from '../../domain/value-objects/plan-name';
 import { SubscriptionId } from '../../domain/value-objects/subscription-id';
 import { SubscriptionPurchasedEventHandler } from './subscription-purchased.event-handler';
 
@@ -98,7 +100,11 @@ describe('SubscriptionPurchasedEventHandler', () => {
       fullName: 'Nguyễn Văn A',
     });
     mockPlanRepo.findById.mockResolvedValue(
-      Plan.create('Pro', 1, new Money(99000)),
+      Plan.create(
+        new PlanName('Pro'),
+        new PlanDurationMonths(1),
+        new Money(99000),
+      ),
     );
     mockEmailSender.sendPaymentSuccessEmail.mockResolvedValue(undefined);
 
@@ -117,7 +123,11 @@ describe('SubscriptionPurchasedEventHandler', () => {
     mockTransactionRepo.findBySubscriptionId.mockResolvedValue(txn);
     mockUserProfilePort.getProfile.mockResolvedValue(null);
     mockPlanRepo.findById.mockResolvedValue(
-      Plan.create('Basic', 1, new Money(50000)),
+      Plan.create(
+        new PlanName('Basic'),
+        new PlanDurationMonths(1),
+        new Money(50000),
+      ),
     );
     mockEmailSender.sendPaymentSuccessEmail.mockResolvedValue(undefined);
 

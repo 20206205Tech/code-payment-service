@@ -22,10 +22,6 @@ export class TransactionCleanupCron {
     private readonly subscriptionRepository: SubscriptionRepositoryPort,
   ) {}
 
-  /**
-   * Chạy mỗi 10 phút để quét các giao dịch PENDING đã quá hạn.
-   * Đây là cơ chế cứu cánh khi BullMQ bị tắt hoặc gặp lỗi.
-   */
   @Cron(CronExpression.EVERY_10_MINUTES)
   async handleStaleTransactions(): Promise<void> {
     this.logger.log('Bắt đầu quét các giao dịch PENDING quá hạn...');

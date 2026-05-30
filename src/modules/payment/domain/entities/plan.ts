@@ -1,11 +1,13 @@
 import { BaseVersionAggregateRoot } from '@20206205tech/nestjs-common';
 import { Money } from '../value-objects/money';
+import { PlanDurationMonths } from '../value-objects/plan-duration-months';
 import { PlanId } from '../value-objects/plan-id';
+import { PlanName } from '../value-objects/plan-name';
 
 export interface PlanProps {
   id: PlanId;
-  name: string;
-  durationMonths: number;
+  name: PlanName;
+  durationMonths: PlanDurationMonths;
   price: Money;
   isActive: boolean;
   createdAt: Date;
@@ -15,8 +17,8 @@ export interface PlanProps {
 
 export class Plan extends BaseVersionAggregateRoot {
   private readonly _planId: PlanId;
-  private _name: string;
-  private _durationMonths: number;
+  private readonly _name: PlanName;
+  private readonly _durationMonths: PlanDurationMonths;
   private _price: Money;
   private _updatedAt: Date;
 
@@ -30,8 +32,8 @@ export class Plan extends BaseVersionAggregateRoot {
   }
 
   public static create(
-    name: string,
-    durationMonths: number,
+    name: PlanName,
+    durationMonths: PlanDurationMonths,
     price: Money,
     isActive: boolean = true,
   ): Plan {
@@ -43,7 +45,7 @@ export class Plan extends BaseVersionAggregateRoot {
       isActive,
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1,
+      version: 0,
     });
   }
 
@@ -52,6 +54,7 @@ export class Plan extends BaseVersionAggregateRoot {
   }
 
   public archive(): void {
+    this.incrementVersion();
     this._isActive = false;
     this._updatedAt = new Date();
   }
@@ -59,10 +62,10 @@ export class Plan extends BaseVersionAggregateRoot {
   get planId(): PlanId {
     return this._planId;
   }
-  get name(): string {
+  get name(): PlanName {
     return this._name;
   }
-  get durationMonths(): number {
+  get durationMonths(): PlanDurationMonths {
     return this._durationMonths;
   }
   get price(): Money {

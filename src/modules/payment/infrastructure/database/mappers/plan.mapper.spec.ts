@@ -1,8 +1,10 @@
-import { PlanMapper } from './plan.mapper';
 import { Plan } from '../../../domain/entities/plan';
 import { Money } from '../../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../../domain/value-objects/plan-duration-months';
 import { PlanId } from '../../../domain/value-objects/plan-id';
+import { PlanName } from '../../../domain/value-objects/plan-name';
 import { PlanEntity } from '../entities/plan.entity';
+import { PlanMapper } from './plan.mapper';
 
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
 
@@ -26,8 +28,8 @@ describe('PlanMapper', () => {
 
       expect(domain).toBeInstanceOf(Plan);
       expect(domain.planId.value).toBe(PLAN_UUID);
-      expect(domain.name).toBe('Pro Monthly');
-      expect(domain.durationMonths).toBe(1);
+      expect(domain.name.value).toBe('Pro Monthly');
+      expect(domain.durationMonths.value).toBe(1);
       expect(domain.price.amount).toBe(99000);
       expect(domain.isActive).toBe(true);
     });
@@ -45,8 +47,8 @@ describe('PlanMapper', () => {
       const now = new Date();
       const domain = Plan.reconstitute({
         id: new PlanId(PLAN_UUID),
-        name: 'Basic',
-        durationMonths: 12,
+        name: new PlanName('Basic'),
+        durationMonths: new PlanDurationMonths(12),
         price: new Money(500000),
         isActive: false,
         createdAt: now,
@@ -67,12 +69,17 @@ describe('PlanMapper', () => {
 
   describe('roundtrip', () => {
     it('toDomain(toOrm(domain)) should produce equivalent domain object', () => {
-      const original = Plan.create('Test', 3, new Money(200000), true);
+      const original = Plan.create(
+        new PlanName('Test'),
+        new PlanDurationMonths(3),
+        new Money(200000),
+        true,
+      );
       const orm = PlanMapper.toOrm(original);
       const restored = PlanMapper.toDomain(orm);
 
-      expect(restored.name).toBe(original.name);
-      expect(restored.durationMonths).toBe(original.durationMonths);
+      expect(restored.name.value).toBe(original.name.value);
+      expect(restored.durationMonths.value).toBe(original.durationMonths.value);
       expect(restored.price.amount).toBe(original.price.amount);
       expect(restored.isActive).toBe(original.isActive);
     });

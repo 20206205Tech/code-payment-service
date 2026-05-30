@@ -25,8 +25,8 @@ export class GetDetailPlanQueryHandler extends BaseQueryHandler<GetDetailPlanQue
     if (!plan) throw new PlanNotFoundException(planId.value);
     return {
       id: plan.planId.value,
-      name: plan.name,
-      durationMonths: plan.durationMonths,
+      name: plan.name.value,
+      durationMonths: plan.durationMonths.value,
       price: plan.price.amount,
       isActive: plan.isActive,
       createdAt: plan.createdAt,

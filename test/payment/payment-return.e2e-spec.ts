@@ -16,7 +16,7 @@ describe('PaymentReturnController (e2e)', () => {
 
   describe('GET/POST /subscriptions/payment-return/:provider', () => {
     it('should handle VNPay return (GET)', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .get('/code-payment-service/subscriptions/payment-return/vnpay')
         .query({ vnp_ResponseCode: '00', vnp_TxnRef: '789' })
         .expect(200);

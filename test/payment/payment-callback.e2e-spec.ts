@@ -16,7 +16,7 @@ describe('PaymentCallbackController (e2e)', () => {
 
   describe('GET/POST /subscriptions/payment-callback/:provider', () => {
     it('should handle VNPay callback (GET)', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .get('/code-payment-service/subscriptions/payment-callback/vnpay')
         .query({ vnp_ResponseCode: '00', vnp_TxnRef: '123' })
         .expect(200);
@@ -26,7 +26,7 @@ describe('PaymentCallbackController (e2e)', () => {
     });
 
     it('should handle MoMo callback (POST)', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .post('/code-payment-service/subscriptions/payment-callback/momo')
         .send({ resultCode: 0, orderId: '456' })
         .expect(200);

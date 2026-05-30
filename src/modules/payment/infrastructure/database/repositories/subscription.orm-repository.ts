@@ -23,10 +23,10 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
     return orm ? SubscriptionMapper.toDomain(orm) : null;
   }
 
-  async findActiveByUserId(userId: UserId): Promise<Subscription | null> {
+  async findByUserId(userId: UserId): Promise<Subscription | null> {
     const orm = await this.repo.findOne({
-      where: { userId: userId.value, status: SubscriptionStatus.ACTIVE },
-      order: { endDate: 'DESC' },
+      where: { userId: userId.value },
+      order: { createdAt: 'DESC' },
     });
     return orm ? SubscriptionMapper.toDomain(orm) : null;
   }
@@ -36,17 +36,9 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
   ): Promise<Subscription | null> {
     const orm = await this.repo.findOne({
       where: { userId: userId.value, status: SubscriptionStatus.ACTIVE },
-      order: { endDate: 'DESC' },
+      order: { periodEnd: 'DESC' },
     });
     return orm ? SubscriptionMapper.toDomain(orm) : null;
-  }
-
-  async findAllActiveByUserId(userId: UserId): Promise<Subscription[]> {
-    const orms = await this.repo.find({
-      where: { userId: userId.value, status: SubscriptionStatus.ACTIVE },
-      order: { endDate: 'DESC' },
-    });
-    return orms.map((orm) => SubscriptionMapper.toDomain(orm));
   }
 
   async isFirstPurchase(userId: UserId): Promise<boolean> {
@@ -75,7 +67,7 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
     const orms = await this.repo.find({
       where: {
         status: SubscriptionStatus.ACTIVE,
-        endDate: LessThan(date),
+        periodEnd: LessThan(date),
       },
     });
     return orms.map((orm) => SubscriptionMapper.toDomain(orm));
@@ -88,7 +80,7 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
     const orms = await this.repo.find({
       where: {
         status: SubscriptionStatus.ACTIVE,
-        endDate: Between(start, end),
+        periodEnd: Between(start, end),
       },
     });
     return orms.map((orm) => SubscriptionMapper.toDomain(orm));
@@ -117,8 +109,8 @@ export class SubscriptionOrmRepository implements SubscriptionRepositoryPort {
             subscriptionId: event.subscriptionId,
             userId: event.userId,
             planId: event.planId,
-            startDate: event.startDate,
-            endDate: event.endDate,
+            periodStart: event.periodStart,
+            periodEnd: event.periodEnd,
             version: event.version,
           },
 

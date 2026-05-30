@@ -76,6 +76,6 @@ export class TransactionEntity {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @Column({ name: 'version', type: 'int', default: 1 })
+  @Column({ name: 'version', type: 'int', default: 0 })
   version: number;
 }

@@ -16,7 +16,7 @@ describe('GetAllPlanController (e2e)', () => {
 
   describe('GET /plans', () => {
     it('should return all plans (public)', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .get('/code-payment-service/plans')
         .expect(200);
 

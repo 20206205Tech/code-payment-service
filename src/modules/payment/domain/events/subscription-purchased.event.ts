@@ -3,8 +3,8 @@ export class SubscriptionPurchasedEvent {
     public readonly subscriptionId: string,
     public readonly userId: string,
     public readonly planId: string,
-    public readonly startDate: Date,
-    public readonly endDate: Date,
-    public readonly version: number = 1,
+    public readonly periodStart: Date,
+    public readonly periodEnd: Date,
+    public readonly version: number = 0,
   ) {}
 }

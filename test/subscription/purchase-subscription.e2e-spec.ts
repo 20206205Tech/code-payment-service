@@ -15,7 +15,7 @@ describe('PurchaseSubscriptionController (e2e)', () => {
     app = await mainWithMockAuth(AppModule);
 
     // Create a plan to purchase
-    const res = await request(app.getHttpServer() as unknown as string)
+    const res = await request(app.getHttpServer())
       .post('/code-payment-service/plans')
       .set(adminHeader())
       .send({ name: 'Subscription Plan', durationMonths: 1, price: 50000 });
@@ -30,7 +30,7 @@ describe('PurchaseSubscriptionController (e2e)', () => {
 
   describe('POST /subscriptions/purchase', () => {
     it('should initiate purchase successfully as user', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .post('/code-payment-service/subscriptions/purchase')
         .set(userHeader())
         .send({
@@ -44,7 +44,7 @@ describe('PurchaseSubscriptionController (e2e)', () => {
     });
 
     it('should return 400 for missing fields', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .post('/code-payment-service/subscriptions/purchase')
         .set(userHeader())
         .send({})

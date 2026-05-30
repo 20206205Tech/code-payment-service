@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method, @typescript-eslint/no-unsafe-argument */
 import { Repository } from 'typeorm';
-import { PlanOrmRepository } from './plan.orm-repository';
 import { Plan } from '../../../domain/entities/plan';
 import { Money } from '../../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../../domain/value-objects/plan-duration-months';
 import { PlanId } from '../../../domain/value-objects/plan-id';
+import { PlanName } from '../../../domain/value-objects/plan-name';
 import { PlanEntity } from '../entities/plan.entity';
+import { PlanOrmRepository } from './plan.orm-repository';
 
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
 
@@ -90,7 +92,11 @@ describe('PlanOrmRepository', () => {
   describe('save()', () => {
     it('should call repository.save with ORM entity', async () => {
       mockTypeOrmRepo.save.mockResolvedValue({} as any);
-      const plan = Plan.create('Basic', 3, new Money(200000));
+      const plan = Plan.create(
+        new PlanName('Basic'),
+        new PlanDurationMonths(3),
+        new Money(200000),
+      );
       await repo.save(plan);
       expect(mockTypeOrmRepo.save).toHaveBeenCalledTimes(1);
 

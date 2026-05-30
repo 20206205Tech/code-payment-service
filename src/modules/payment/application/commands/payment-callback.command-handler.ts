@@ -133,10 +133,10 @@ export class PaymentCallbackCommandHandler extends BaseCommandHandler<
           );
 
         let baseDate = new Date();
-        if (latestActiveSub && latestActiveSub.endDate > baseDate) {
-          baseDate = latestActiveSub.endDate;
+        if (latestActiveSub && latestActiveSub.periodEnd > baseDate) {
+          baseDate = latestActiveSub.periodEnd;
           this.logger.log(
-            `Stacking subscription for user ${txn.userId.value}. New startDate: ${baseDate.toISOString()}`,
+            `Stacking subscription for user ${txn.userId.value}. New periodStart: ${baseDate.toISOString()}`,
           );
         }
 

@@ -6,9 +6,4 @@ describe('SubscriptionStatus', () => {
     expect(SubscriptionStatus.ACTIVE).toBe('active');
     expect(SubscriptionStatus.EXPIRED).toBe('expired');
   });
-
-  it('should be usable as a type', () => {
-    const status: SubscriptionStatus = SubscriptionStatus.ACTIVE;
-    expect(status).toBe('active');
-  });
 });

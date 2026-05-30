@@ -1,3 +1,4 @@
+import { SubscriptionStatus } from '../../../domain/value-objects/subscription-status';
 import { SubscriptionEntity } from './subscription.entity';
 
 describe('SubscriptionEntity', () => {
@@ -5,9 +6,9 @@ describe('SubscriptionEntity', () => {
     const entity = new SubscriptionEntity();
     entity.id = 'sub-123';
     entity.userId = 'user-456';
-    entity.status = 'active';
+    entity.status = SubscriptionStatus.ACTIVE;
 
     expect(entity.id).toBe('sub-123');
-    expect(entity.status).toBe('active');
+    expect(entity.status).toBe(SubscriptionStatus.ACTIVE);
   });
 });

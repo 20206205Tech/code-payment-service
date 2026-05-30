@@ -21,13 +21,13 @@ describe('CreatePlanController (e2e)', () => {
   describe('POST /plans', () => {
     it('should create a plan successfully as admin', async () => {
       const payload = {
-        name: 'VIP 1 tháng',
+        name: 'VIP 1',
         durationMonths: 1,
         price: 99000,
         isActive: true,
       };
 
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .post('/code-payment-service/plans')
         .set(adminHeader())
         .send(payload)
@@ -39,7 +39,7 @@ describe('CreatePlanController (e2e)', () => {
     });
 
     it('should return 403 as regular user', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .post('/code-payment-service/plans')
         .set(userHeader())
         .send({ name: 'Test', durationMonths: 1, price: 1000 })

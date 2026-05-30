@@ -63,7 +63,7 @@ export class SubscriptionPurchasedEventHandler extends BaseEventHandler<Subscrip
 
       // 3. Lấy thông tin gói dịch vụ
       const plan = await this.planRepository.findById(new PlanId(planId));
-      const planName = plan ? plan.name : 'Gói dịch vụ';
+      const planName = plan ? plan.name.value : 'Gói dịch vụ';
 
       // 4. Gửi email thông báo
       await this.emailSenderPort.sendPaymentSuccessEmail(

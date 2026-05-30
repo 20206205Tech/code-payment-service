@@ -1,21 +1,23 @@
 /* eslint-disable @typescript-eslint/unbound-method, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import { EventPublisher } from '@nestjs/cqrs';
 import { DataSource } from 'typeorm';
-import { TransactionRepositoryPort } from '../../application/ports/database/transaction.repository.port';
-import { SubscriptionRepositoryPort } from '../../application/ports/database/subscription.repository.port';
 import { PlanRepositoryPort } from '../../application/ports/database/plan.repository.port';
+import { SubscriptionRepositoryPort } from '../../application/ports/database/subscription.repository.port';
+import { TransactionRepositoryPort } from '../../application/ports/database/transaction.repository.port';
 // Removed unused PAYMENT_GATEWAY_PORT
 
+import { UserId } from '@20206205tech/nestjs-common';
+import { Plan } from '../../domain/entities/plan';
 import { Subscription } from '../../domain/entities/subscription';
 import { Transaction } from '../../domain/entities/transaction';
-import { Money } from '../../domain/value-objects/money';
-import { PlanId } from '../../domain/value-objects/plan-id';
-import { SubscriptionId } from '../../domain/value-objects/subscription-id';
-import { UserId } from '@20206205tech/nestjs-common';
-import { PaymentCallbackCommandHandler } from './payment-callback.command-handler';
-import { PaymentCallbackCommand } from './payment-callback.command';
 import { PaymentDomainService } from '../../domain/services/payment.domain-service';
-import { Plan } from '../../domain/entities/plan';
+import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanId } from '../../domain/value-objects/plan-id';
+import { PlanName } from '../../domain/value-objects/plan-name';
+import { SubscriptionId } from '../../domain/value-objects/subscription-id';
+import { PaymentCallbackCommand } from './payment-callback.command';
+import { PaymentCallbackCommandHandler } from './payment-callback.command-handler';
 
 const USER_UUID = '11111111-1111-1111-8111-111111111111';
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
@@ -41,8 +43,8 @@ function makePendingSubscription(): Subscription {
     id: new SubscriptionId(SUB_UUID),
     userId: new UserId(USER_UUID),
     planId: new PlanId(PLAN_UUID),
-    startDate: now,
-    endDate: new Date(now.getTime() + 30 * 86400000),
+    periodStart: now,
+    periodEnd: new Date(now.getTime() + 30 * 86400000),
     status: 'pending',
     createdAt: now,
     updatedAt: now,
@@ -161,7 +163,12 @@ describe('PaymentCallbackCommandHandler', () => {
     mockSubscriptionRepo.save.mockResolvedValue(undefined);
     mockTransactionRepo.save.mockResolvedValue(undefined);
     mockPlanRepo.findById.mockResolvedValue(
-      Plan.create('Pro', 1, new Money(100), true),
+      Plan.create(
+        new PlanName('Pro'),
+        new PlanDurationMonths(1),
+        new Money(100),
+        true,
+      ),
     );
 
     const result = await handler.execute(

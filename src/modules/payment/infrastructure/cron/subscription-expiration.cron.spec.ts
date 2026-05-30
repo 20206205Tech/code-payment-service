@@ -20,11 +20,14 @@ import {
 } from '../../application/ports/service/user-profile.port';
 import { Plan } from '../../domain/entities/plan';
 import { Subscription } from '../../domain/entities/subscription';
-import { Money } from '../../domain/value-objects/money';
-import { PlanId } from '../../domain/value-objects/plan-id';
-import { SubscriptionId } from '../../domain/value-objects/subscription-id';
-import { SubscriptionExpirationCron } from './subscription-expiration.cron';
 import { PaymentDomainService } from '../../domain/services/payment.domain-service';
+import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanId } from '../../domain/value-objects/plan-id';
+import { PlanName } from '../../domain/value-objects/plan-name';
+import { SubscriptionId } from '../../domain/value-objects/subscription-id';
+import { SubscriptionStatus } from '../../domain/value-objects/subscription-status';
+import { SubscriptionExpirationCron } from './subscription-expiration.cron';
 
 const SUB_UUID = '33333333-3333-3333-8333-333333333333';
 const USER_UUID = '11111111-1111-1111-8111-111111111111';
@@ -49,7 +52,7 @@ describe('SubscriptionExpirationCron', () => {
     } as unknown as jest.Mocked<PlanRepositoryPort>;
     userProfileService = {
       getProfile: jest.fn(),
-    } as unknown as jest.Mocked<UserProfilePort>;
+    };
     notificationService = {
       sendSubscriptionExpiredEmail: jest.fn(),
       sendSubscriptionExpirationWarningEmail: jest.fn(),
@@ -85,9 +88,9 @@ describe('SubscriptionExpirationCron', () => {
         id: new SubscriptionId(SUB_UUID),
         userId: new UserId(USER_UUID),
         planId: new PlanId(PLAN_UUID),
-        startDate: new Date(),
-        endDate: now,
-        status: 'active',
+        periodStart: new Date(),
+        periodEnd: now,
+        status: SubscriptionStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -103,7 +106,11 @@ describe('SubscriptionExpirationCron', () => {
         fullName: 'Test User',
       });
       planRepo.findById.mockResolvedValue(
-        Plan.create('Pro Plan', 1, new Money(100000)),
+        Plan.create(
+          new PlanName('Pro Plan'),
+          new PlanDurationMonths(1),
+          new Money(100000),
+        ),
       );
 
       await cron.handleSubscriptionExpiration();
@@ -139,9 +146,9 @@ describe('SubscriptionExpirationCron', () => {
         id: new SubscriptionId(SUB_UUID),
         userId: new UserId(USER_UUID),
         planId: new PlanId(PLAN_UUID),
-        startDate: new Date(),
-        endDate: new Date(),
-        status: 'active',
+        periodStart: new Date(),
+        periodEnd: new Date(),
+        status: SubscriptionStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -153,7 +160,11 @@ describe('SubscriptionExpirationCron', () => {
         fullName: 'Warn User',
       });
       planRepo.findById.mockResolvedValue(
-        Plan.create('Basic Plan', 1, new Money(50000)),
+        Plan.create(
+          new PlanName('Basic Plan'),
+          new PlanDurationMonths(1),
+          new Money(50000),
+        ),
       );
 
       await cron.handleSubscriptionExpiration();
@@ -161,7 +172,7 @@ describe('SubscriptionExpirationCron', () => {
       expect(subscriptionRepo.findActiveExpiringBetween).toHaveBeenCalled();
       expect(
         notificationService.sendSubscriptionExpirationWarningEmail,
-      ).toHaveBeenCalledWith('warn@example.com', 'Warn User', 'Basic Plan', 1);
+      ).toHaveBeenCalledWith('warn@example.com', 'Warn User', 'Basic Plan', 7);
     });
   });
 });

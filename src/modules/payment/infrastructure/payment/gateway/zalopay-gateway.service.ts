@@ -170,19 +170,13 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
   }
 
   private verifyIpnCallback(data: Record<string, any>): IpnVerifyResult {
-    console.log('🚀 ~ ZalopayGatewayService ~ verifyIpnCallback ~ data:', data);
     // Nếu data.data đã bị framework parse thành object, ta phải stringify lại.
     // Tốt nhất là Controller không nên parse ngầm trường này.
     const dataStr =
       typeof data.data === 'object'
         ? JSON.stringify(data.data)
         : String(data.data || '');
-    console.log(
-      '🚀 ~ ZalopayGatewayService ~ verifyIpnCallback ~ dataStr:',
-      dataStr,
-    );
     const mac = String(data.mac || '');
-    console.log('🚀 ~ ZalopayGatewayService ~ verifyIpnCallback ~ mac:', mac);
 
     // Thêm log để debug xem dataStr có đúng là chuỗi JSON hợp lệ không, hay là "[object Object]"
     this.logger.debug(`[ZaloPay IPN] dataStr before hash: ${dataStr}`);
@@ -191,10 +185,6 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
       .createHmac('sha256', this.key2)
       .update(dataStr)
       .digest('hex');
-    console.log(
-      '🚀 ~ ZalopayGatewayService ~ verifyIpnCallback ~ expectedMac:',
-      expectedMac,
-    );
 
     this.logger.log(`[ZaloPay IPN] expected=${expectedMac}, got=${mac}`);
 
@@ -215,10 +205,6 @@ export class ZalopayGatewayService implements PaymentGatewayPort {
       zp_trans_id: string | number;
       amount: number;
     };
-    console.log(
-      '🚀 ~ ZalopayGatewayService ~ verifyIpnCallback ~ dataJson:',
-      dataJson,
-    );
     return {
       isValid: true,
       txnRef: String(dataJson.app_trans_id),

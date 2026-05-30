@@ -19,7 +19,7 @@ describe('ManualActivateTransactionController (e2e)', () => {
 
   describe('POST /subscriptions/manual-activate/:id', () => {
     it('should return 404 for non-existent transaction', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .post(
           '/code-payment-service/subscriptions/manual-activate/123e4567-e89b-42d3-a456-426614174999',
         )
@@ -28,7 +28,7 @@ describe('ManualActivateTransactionController (e2e)', () => {
     });
 
     it('should return 403 as regular user', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .post('/code-payment-service/subscriptions/manual-activate/some-id')
         .set({
           'X-Test-User': JSON.stringify({

@@ -1,5 +1,6 @@
 import { UserId } from '@20206205tech/nestjs-common';
 import { Money } from '../value-objects/money';
+import { PaymentStatus } from '../value-objects/payment-status';
 import { PlanId } from '../value-objects/plan-id';
 import { SubscriptionId } from '../value-objects/subscription-id';
 import { TransactionId } from '../value-objects/transaction-id';
@@ -28,7 +29,7 @@ describe('Transaction Entity', () => {
   describe('Transaction.create()', () => {
     it('should create with status = pending', () => {
       const txn = makeTransaction();
-      expect(txn.paymentStatus).toBe('pending');
+      expect(txn.paymentStatus).toBe(PaymentStatus.PENDING);
     });
 
     it('should store all amounts correctly', () => {
@@ -71,7 +72,7 @@ describe('Transaction Entity', () => {
         finalAmount: new Money(180000),
         transactionRef: 'REF_001',
         paymentMethod: 'zalopay',
-        paymentStatus: 'success',
+        paymentStatus: PaymentStatus.SUCCESS,
         providerTransactionId: 'ZALO_123',
         paymentMetadata: {},
         paidAt: now,
@@ -80,7 +81,7 @@ describe('Transaction Entity', () => {
         version: 1,
       });
       expect(txn.transactionId.value).toBe(TXN_UUID);
-      expect(txn.paymentStatus).toBe('success');
+      expect(txn.paymentStatus).toBe(PaymentStatus.SUCCESS);
       expect(txn.providerTransactionId).toBe('ZALO_123');
     });
   });
@@ -104,7 +105,7 @@ describe('Transaction Entity', () => {
     it('should change status to success', () => {
       const txn = makeTransaction();
       txn.markSuccess();
-      expect(txn.paymentStatus).toBe('success');
+      expect(txn.paymentStatus).toBe(PaymentStatus.SUCCESS);
     });
   });
 
@@ -112,7 +113,7 @@ describe('Transaction Entity', () => {
     it('should change status to failed', () => {
       const txn = makeTransaction();
       txn.markFailed();
-      expect(txn.paymentStatus).toBe('failed');
+      expect(txn.paymentStatus).toBe(PaymentStatus.FAILED);
     });
   });
 
@@ -120,7 +121,7 @@ describe('Transaction Entity', () => {
     it('should change status to expired', () => {
       const txn = makeTransaction();
       txn.markExpired();
-      expect(txn.paymentStatus).toBe('expired');
+      expect(txn.paymentStatus).toBe(PaymentStatus.EXPIRED);
     });
   });
 

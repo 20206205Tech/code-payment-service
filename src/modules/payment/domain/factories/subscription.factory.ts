@@ -6,9 +6,9 @@ export class SubscriptionFactory {
   static create(
     userId: UserId,
     planId: PlanId,
-    startDate: Date,
-    endDate: Date,
+    periodStart: Date,
+    periodEnd: Date,
   ): Subscription {
-    return Subscription.create(userId, planId, startDate, endDate);
+    return Subscription.create(userId, planId, periodStart, periodEnd);
   }
 }

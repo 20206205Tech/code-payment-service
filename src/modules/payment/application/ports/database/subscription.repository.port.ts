@@ -8,9 +8,8 @@ export const SUBSCRIPTION_REPOSITORY_PORT = Symbol(
 
 export interface SubscriptionRepositoryPort {
   findById(id: SubscriptionId): Promise<Subscription | null>;
-  findActiveByUserId(userId: UserId): Promise<Subscription | null>;
+  findByUserId(userId: UserId): Promise<Subscription | null>;
   findLatestActiveSubscription(userId: UserId): Promise<Subscription | null>;
-  findAllActiveByUserId(userId: UserId): Promise<Subscription[]>;
   isFirstPurchase(userId: UserId): Promise<boolean>;
   deactivateOtherSubscriptions(
     userId: UserId,

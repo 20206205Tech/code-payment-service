@@ -25,8 +25,8 @@ export class CreatePlanController extends BaseController {
     // Sử dụng interface thay vì class trực tiếp để tránh lỗi resolution với strict linting
     const result = intermediate as {
       planId: { value: string };
-      name: string;
-      durationMonths: number;
+      name: { value: string };
+      durationMonths: { value: number };
       price: { amount: number };
     };
 
@@ -34,8 +34,8 @@ export class CreatePlanController extends BaseController {
       message: 'Tạo gói dịch vụ thành công',
       data: {
         id: result.planId.value,
-        name: result.name,
-        durationMonths: result.durationMonths,
+        name: result.name.value,
+        durationMonths: result.durationMonths.value,
         price: result.price.amount,
       },
     });

@@ -10,8 +10,8 @@ export class SubscriptionMapper {
       id: new SubscriptionId(orm.id),
       userId: new UserId(orm.userId),
       planId: new PlanId(orm.planId),
-      startDate: orm.startDate,
-      endDate: orm.endDate,
+      periodStart: orm.periodStart,
+      periodEnd: orm.periodEnd,
       status: orm.status,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
@@ -24,8 +24,8 @@ export class SubscriptionMapper {
     orm.id = domain.subscriptionId.value;
     orm.userId = domain.userId.value;
     orm.planId = domain.planId.value;
-    orm.startDate = domain.startDate;
-    orm.endDate = domain.endDate;
+    orm.periodStart = domain.periodStart;
+    orm.periodEnd = domain.periodEnd;
     orm.status = domain.status;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;

@@ -12,8 +12,8 @@ interface SubscriptionPurchasedOutboxPayload {
   subscriptionId: string;
   userId: string;
   planId: string;
-  startDate: string | number | Date;
-  endDate: string | number | Date;
+  periodStart: string | number | Date;
+  periodEnd: string | number | Date;
   version: number;
 }
 
@@ -55,8 +55,8 @@ export class OutboxRelayCron {
               subscriptionId: payload.subscriptionId,
               userId: payload.userId,
               planId: payload.planId,
-              startDate: new Date(payload.startDate),
-              endDate: new Date(payload.endDate),
+              periodStart: new Date(payload.periodStart),
+              periodEnd: new Date(payload.periodEnd),
               version: payload.version,
             });
 
