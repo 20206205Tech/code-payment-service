@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
-import { ArchivePlanCommandHandler } from './archive-plan.command-handler';
-import { ArchivePlanCommand } from './archive-plan.command';
 import { Plan } from '../../domain/entities/plan';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
 import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanName } from '../../domain/value-objects/plan-name';
+import { ArchivePlanCommand } from './archive-plan.command';
+import { ArchivePlanCommandHandler } from './archive-plan.command-handler';
 
 import { PlanRepositoryPort } from '../../application/ports/database/plan.repository.port';
 
@@ -16,7 +18,12 @@ const mockPlanRepository = {
 } as unknown as jest.Mocked<PlanRepositoryPort>;
 
 function makeActivePlan(): Plan {
-  return Plan.create('Pro', 1, new Money(99000), true);
+  return Plan.create(
+    new PlanName('Pro'),
+    new PlanDurationMonths(1),
+    new Money(99000),
+    true,
+  );
 }
 
 describe('ArchivePlanCommandHandler', () => {

@@ -3,12 +3,12 @@ import { PaymentCallbackController } from './payment-callback.controller';
 
 describe('PaymentCallbackController', () => {
   let controller: PaymentCallbackController;
-  const mockCommandBus = {
+  const mockCommandBus: Pick<CommandBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<CommandBus>;
-  const mockQueryBus = {
+  };
+  const mockQueryBus: Pick<QueryBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<QueryBus>;
+  };
 
   beforeEach(() => {
     controller = new PaymentCallbackController(mockCommandBus, mockQueryBus);

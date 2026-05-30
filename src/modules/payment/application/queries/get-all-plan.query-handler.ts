@@ -32,8 +32,8 @@ export class GetAllPlanQueryHandler extends BaseQueryHandler<GetAllPlanQuery> {
     );
     return plans.map((p) => ({
       id: p.planId.value,
-      name: p.name,
-      durationMonths: p.durationMonths,
+      name: p.name.value,
+      durationMonths: p.durationMonths.value,
       price: p.price.amount,
       isActive: p.isActive,
       createdAt: p.createdAt,

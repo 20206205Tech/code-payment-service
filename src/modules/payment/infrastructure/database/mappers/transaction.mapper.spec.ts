@@ -1,6 +1,7 @@
 import { UserId } from '@20206205tech/nestjs-common';
 import { Transaction } from '../../../domain/entities/transaction';
 import { Money } from '../../../domain/value-objects/money';
+import { PaymentStatus } from '../../../domain/value-objects/payment-status';
 import { PlanId } from '../../../domain/value-objects/plan-id';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
 import { TransactionId } from '../../../domain/value-objects/transaction-id';
@@ -46,7 +47,7 @@ describe('TransactionMapper', () => {
       expect(domain.baseAmount.amount).toBe(100000);
       expect(domain.discountAmount.amount).toBe(10000);
       expect(domain.finalAmount.amount).toBe(90000);
-      expect(domain.paymentStatus).toBe('pending');
+      expect(domain.paymentStatus).toBe(PaymentStatus.PENDING);
       expect(domain.providerTransactionId).toBeNull();
     });
 
@@ -74,7 +75,7 @@ describe('TransactionMapper', () => {
         finalAmount: new Money(200000),
         transactionRef: 'REF',
         paymentMethod: 'zalopay',
-        paymentStatus: 'success',
+        paymentStatus: PaymentStatus.SUCCESS,
         providerTransactionId: 'ZALO_123',
         paymentMetadata: {},
         paidAt: new Date('2024-01-15'),
@@ -101,7 +102,7 @@ describe('TransactionMapper', () => {
       expect(restored.id).toBe(orm.id);
       expect(restored.transactionRef).toBe(orm.transactionRef);
       expect(restored.paymentMethod).toBe(orm.paymentMethod);
-      expect(restored.paymentStatus).toBe(orm.paymentStatus);
+      expect(restored.paymentStatus).toBe(PaymentStatus.PENDING);
     });
   });
 });

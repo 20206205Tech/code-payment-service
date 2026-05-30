@@ -19,7 +19,7 @@ describe('GetMySubscriptionController (e2e)', () => {
 
   describe('GET /subscriptions', () => {
     it('should return user subscription successfully', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .get('/code-payment-service/subscriptions')
         .set(userHeader())
         .expect(200);
@@ -30,7 +30,7 @@ describe('GetMySubscriptionController (e2e)', () => {
     });
 
     it('should return 403 when not authenticated', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .get('/code-payment-service/subscriptions')
         .expect(403);
     });

@@ -2,6 +2,7 @@ import { UserId } from '@20206205tech/nestjs-common';
 import { Subscription } from '../../../domain/entities/subscription';
 import { PlanId } from '../../../domain/value-objects/plan-id';
 import { SubscriptionId } from '../../../domain/value-objects/subscription-id';
+import { SubscriptionStatus } from '../../../domain/value-objects/subscription-status';
 import { SubscriptionEntity } from '../entities/subscription.entity';
 import { SubscriptionMapper } from './subscription.mapper';
 
@@ -9,13 +10,15 @@ const USER_UUID = '11111111-1111-1111-8111-111111111111';
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
 const SUB_UUID = '33333333-3333-3333-8333-333333333333';
 
-function makeOrmEntity(status = 'active'): SubscriptionEntity {
+function makeOrmEntity(
+  status: SubscriptionStatus = SubscriptionStatus.ACTIVE,
+): SubscriptionEntity {
   const e = new SubscriptionEntity();
   e.id = SUB_UUID;
   e.userId = USER_UUID;
   e.planId = PLAN_UUID;
-  e.startDate = new Date('2024-01-01');
-  e.endDate = new Date('2024-02-01');
+  e.periodStart = new Date('2024-01-01');
+  e.periodEnd = new Date('2024-02-01');
   e.status = status;
   e.createdAt = new Date('2024-01-01');
   e.updatedAt = new Date('2024-01-01');
@@ -32,11 +35,15 @@ describe('SubscriptionMapper', () => {
       expect(domain.subscriptionId.value).toBe(SUB_UUID);
       expect(domain.userId.value).toBe(USER_UUID);
       expect(domain.planId.value).toBe(PLAN_UUID);
-      expect(domain.status).toBe('active');
+      expect(domain.status).toBe(SubscriptionStatus.ACTIVE);
     });
 
     it('should correctly map all statuses', () => {
-      for (const status of ['pending', 'active', 'expired']) {
+      for (const status of [
+        SubscriptionStatus.PENDING,
+        SubscriptionStatus.ACTIVE,
+        SubscriptionStatus.EXPIRED,
+      ]) {
         const orm = makeOrmEntity(status);
         const domain = SubscriptionMapper.toDomain(orm);
         expect(domain.status).toBe(status);
@@ -51,9 +58,9 @@ describe('SubscriptionMapper', () => {
         id: new SubscriptionId(SUB_UUID),
         userId: new UserId(USER_UUID),
         planId: new PlanId(PLAN_UUID),
-        startDate: now,
-        endDate: now,
-        status: 'pending',
+        periodStart: now,
+        periodEnd: now,
+        status: SubscriptionStatus.PENDING,
         createdAt: now,
         updatedAt: now,
         version: 1,
@@ -65,13 +72,13 @@ describe('SubscriptionMapper', () => {
       expect(orm.id).toBe(SUB_UUID);
       expect(orm.userId).toBe(USER_UUID);
       expect(orm.planId).toBe(PLAN_UUID);
-      expect(orm.status).toBe('pending');
+      expect(orm.status).toBe(SubscriptionStatus.PENDING);
     });
   });
 
   describe('roundtrip', () => {
     it('should preserve all data through toDomain → toOrm cycle', () => {
-      const orm = makeOrmEntity('active');
+      const orm = makeOrmEntity(SubscriptionStatus.ACTIVE);
       const domain = SubscriptionMapper.toDomain(orm);
       const restored = SubscriptionMapper.toOrm(domain);
 

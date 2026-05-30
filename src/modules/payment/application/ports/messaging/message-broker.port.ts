@@ -4,8 +4,8 @@ export interface SubscriptionPurchasedPayload {
   subscriptionId: string;
   userId: string;
   planId: string;
-  startDate: Date;
-  endDate: Date;
+  periodStart: Date;
+  periodEnd: Date;
   version: number;
 }
 

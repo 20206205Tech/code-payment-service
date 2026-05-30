@@ -3,6 +3,8 @@ import { CommandHandler } from '@nestjs/cqrs';
 import { BaseCommandHandler } from '@20206205tech/nestjs-common';
 import { Plan } from '../../domain/entities/plan';
 import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanName } from '../../domain/value-objects/plan-name';
 import { PlanFactory } from '../../domain/factories/plan.factory';
 import {
   PLAN_REPOSITORY_PORT,
@@ -24,8 +26,8 @@ export class CreatePlanCommandHandler extends BaseCommandHandler<
 
   async execute(command: CreatePlanCommand): Promise<Plan> {
     const plan = PlanFactory.create(
-      command.name,
-      command.durationMonths,
+      new PlanName(command.name),
+      new PlanDurationMonths(command.durationMonths),
       new Money(command.price),
       command.isActive,
     );

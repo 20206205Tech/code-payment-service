@@ -14,7 +14,7 @@ describe('GetDetailPlanController (e2e)', () => {
     app = await mainWithMockAuth(AppModule);
 
     // Create a plan to get detail from
-    const res = await request(app.getHttpServer() as unknown as string)
+    const res = await request(app.getHttpServer())
       .post('/code-payment-service/plans')
       .set(adminHeader())
       .send({ name: 'Detail Test', durationMonths: 1, price: 50000 });
@@ -29,7 +29,7 @@ describe('GetDetailPlanController (e2e)', () => {
 
   describe('GET /plans/:id', () => {
     it('should return plan details', async () => {
-      const response = await request(app.getHttpServer() as unknown as string)
+      const response = await request(app.getHttpServer())
         .get(`/code-payment-service/plans/${planId}`)
         .expect(200);
 
@@ -39,7 +39,7 @@ describe('GetDetailPlanController (e2e)', () => {
     });
 
     it('should return 400 for invalid UUID', async () => {
-      await request(app.getHttpServer() as unknown as string)
+      await request(app.getHttpServer())
         .get('/code-payment-service/plans/invalid-uuid')
         .expect(400);
     });

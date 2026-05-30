@@ -5,7 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CompressionTypes, Kafka, Producer } from 'kafkajs';
+import { CompressionTypes, Kafka, Partitioners, Producer } from 'kafkajs';
 import {
   MessageBrokerPort,
   SubscriptionPurchasedPayload,
@@ -24,34 +24,20 @@ export class KafkaMessageBrokerAdapter
       : 'prod-payment-events';
 
   constructor(private readonly configService: ConfigService) {
-    // 1. Lấy toàn bộ các chứng chỉ cần thiết từ Doppler
-    const caRaw = this.configService.getOrThrow<string>('KAFKA_SSL_CA');
-    const certRaw = this.configService.getOrThrow<string>('KAFKA_SSL_CERT');
-    const keyRaw = this.configService.getOrThrow<string>('KAFKA_SSL_KEY');
-
-    // 2. Chuẩn hóa lại các ký tự escape newlines từ Doppler
-    const ca = caRaw.replace(/\\n/g, '\n');
-    const cert = certRaw.replace(/\\n/g, '\n');
-    const key = keyRaw.replace(/\\n/g, '\n');
-
     const kafka = new Kafka({
       clientId: 'payment-service',
       brokers: [this.configService.getOrThrow<string>('KAFKA_BROKER')],
       ssl: {
-        ca: [ca],
-        cert: cert, // Thêm Client Certificate
-        key: key, // Thêm Client Key
+        ca: [this.configService.getOrThrow<string>('KAFKA_SSL_CA')],
+        cert: this.configService.getOrThrow<string>('KAFKA_SSL_CERT'),
+        key: this.configService.getOrThrow<string>('KAFKA_SSL_KEY'),
         rejectUnauthorized: true,
       },
-      // sasl: {
-      //   mechanism: 'scram-sha-256',
-      //   username: this.configService.getOrThrow<string>('KAFKA_USERNAME'),
-      //   password: this.configService.getOrThrow<string>('KAFKA_PASSWORD'),
-      // },
     });
 
     this.producer = kafka.producer({
       allowAutoTopicCreation: false,
+      createPartitioner: Partitioners.DefaultPartitioner,
     });
   }
 
@@ -76,17 +62,16 @@ export class KafkaMessageBrokerAdapter
           key: payload.userId,
           value: JSON.stringify({
             ...payload,
-            startDate: payload.startDate.toISOString(),
-            endDate: payload.endDate.toISOString(),
+            periodStart: payload.periodStart.toISOString(),
+            periodEnd: payload.periodEnd.toISOString(),
             occurredAt: new Date().toISOString(),
           }),
         },
       ],
     });
 
-    this.logger.log(
+    this.logger.debug(
       `📨 Kafka [${KafkaMessageBrokerAdapter.TOPIC_SUBSCRIPTION_PURCHASED}]: published for payload=${JSON.stringify(payload)}`,
-      // `📨 Kafka [${KafkaMessageBrokerAdapter.TOPIC_SUBSCRIPTION_PURCHASED}]: published for userId=${payload.userId}, subscriptionId=${payload.subscriptionId}`,
     );
   }
 }

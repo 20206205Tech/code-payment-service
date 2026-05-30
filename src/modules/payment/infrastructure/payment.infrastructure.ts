@@ -54,7 +54,7 @@ export const PaymentGatewayInfrastructure = {
           'PAYMENT_VNPAY_PAYMENT_URL',
         ),
         //  testMode: process.env.ENVIRONMENT === 'development',
-        testMode: true,
+        testMode: true, // Vì không có thông tin prod
       }),
     }),
   ],

@@ -3,12 +3,12 @@ import { GetMySubscriptionController } from './get-my-subscription.controller';
 
 describe('GetMySubscriptionController', () => {
   let controller: GetMySubscriptionController;
-  const mockCommandBus = {
+  const mockCommandBus: Pick<CommandBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<CommandBus>;
-  const mockQueryBus = {
+  };
+  const mockQueryBus: Pick<QueryBus, 'execute'> = {
     execute: jest.fn(),
-  } as unknown as jest.Mocked<QueryBus>;
+  };
 
   beforeEach(() => {
     controller = new GetMySubscriptionController(mockCommandBus, mockQueryBus);

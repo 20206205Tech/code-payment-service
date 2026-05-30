@@ -14,6 +14,7 @@ jest.mock('kafkajs', () => {
       })),
     })),
     CompressionTypes: { GZIP: 1 },
+    Partitioners: { DefaultPartitioner: jest.fn() },
   };
 });
 
@@ -48,25 +49,31 @@ describe('KafkaMessageBrokerAdapter', () => {
 
   describe('publishSubscriptionPurchased', () => {
     it('should call producer.send with correct payload', async () => {
+      const now = new Date('2026-05-30T10:00:00.000Z');
       const payload = {
         userId: 'user-123',
         subscriptionId: 'sub-456',
         planId: 'plan-789',
-        startDate: new Date(),
-        endDate: new Date(),
+        periodStart: now,
+        periodEnd: new Date('2026-06-30T10:00:00.000Z'),
+        version: 1,
+      };
+
+      // Mock the producer.send method
+      const mockSend = jest.fn().mockResolvedValue(undefined);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (adapter as any).producer = {
+        send: mockSend,
       };
 
       await adapter.publishSubscriptionPurchased(payload);
 
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-      expect(
-        (adapter as any as { producer: any }).producer.send,
-      ).toHaveBeenCalledWith(
-        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+      expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           messages: expect.arrayContaining([
             expect.objectContaining({
               key: payload.userId,
+              value: expect.stringContaining(payload.subscriptionId),
             }),
           ]),
         }),

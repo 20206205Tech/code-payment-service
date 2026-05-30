@@ -32,7 +32,7 @@ describe('PlanCleanupCron', () => {
     planRepo.delete.mockResolvedValue({
       affected: 5,
       raw: [],
-    } as import('typeorm').DeleteResult);
+    });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const loggerSpy = jest.spyOn((cron as any).logger, 'log');
 

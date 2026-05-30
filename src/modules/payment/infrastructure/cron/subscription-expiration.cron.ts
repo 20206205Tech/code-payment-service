@@ -17,8 +17,8 @@ import {
   USER_PROFILE_PORT,
   type UserProfilePort,
 } from '../../application/ports/service/user-profile.port';
-import { Transaction } from '../../domain/entities/transaction';
 import { PaymentDomainService } from '../../domain/services/payment.domain-service';
+import { SUBSCRIPTION_EXPIRATION_WARNING_DAYS } from '../../domain/value-objects/constants';
 
 @Injectable()
 export class SubscriptionExpirationCron {
@@ -67,10 +67,7 @@ export class SubscriptionExpirationCron {
         const sub = subData;
 
         // Use Domain Service to handle expiration logic
-        this.paymentDomainService.expirePayment(
-          null as unknown as Transaction,
-          sub,
-        );
+        this.paymentDomainService.expirePayment(null, sub);
 
         await this.subscriptionRepo.save(sub);
 
@@ -84,7 +81,7 @@ export class SubscriptionExpirationCron {
           await this.notificationService.sendSubscriptionExpiredEmail(
             profile.email,
             profile.fullName || 'Quý khách',
-            plan?.name || 'Gói dịch vụ',
+            plan?.name.value || 'Gói dịch vụ',
           );
         }
 
@@ -103,30 +100,33 @@ export class SubscriptionExpirationCron {
   }
 
   private async processNotifications(): Promise<void> {
-    // Thông báo trước 1 ngày
-    const tomorrowStart = new Date();
-    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-    tomorrowStart.setHours(0, 0, 0, 0);
+    const warningStart = new Date();
+    warningStart.setDate(
+      warningStart.getDate() + SUBSCRIPTION_EXPIRATION_WARNING_DAYS,
+    );
+    warningStart.setHours(0, 0, 0, 0);
 
-    const tomorrowEnd = new Date();
-    tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
-    tomorrowEnd.setHours(23, 59, 59, 999);
+    const warningEnd = new Date();
+    warningEnd.setDate(
+      warningEnd.getDate() + SUBSCRIPTION_EXPIRATION_WARNING_DAYS,
+    );
+    warningEnd.setHours(23, 59, 59, 999);
 
     const expiringSubscriptions =
       await this.subscriptionRepo.findActiveExpiringBetween(
-        tomorrowStart,
-        tomorrowEnd,
+        warningStart,
+        warningEnd,
       );
 
     if (expiringSubscriptions.length === 0) {
       this.logger.log(
-        'Không có subscription nào sắp hết hạn trong 1 ngày tới.',
+        `Không có subscription nào sắp hết hạn trong ${SUBSCRIPTION_EXPIRATION_WARNING_DAYS} ngày tới.`,
       );
       return;
     }
 
     this.logger.log(
-      `Tìm thấy ${expiringSubscriptions.length} subscription sắp hết hạn trong 1 ngày tới. Đang gửi thông báo...`,
+      `Tìm thấy ${expiringSubscriptions.length} subscription sắp hết hạn trong ${SUBSCRIPTION_EXPIRATION_WARNING_DAYS} ngày tới. Đang gửi thông báo...`,
     );
 
     for (const sub of expiringSubscriptions) {
@@ -140,8 +140,8 @@ export class SubscriptionExpirationCron {
           await this.notificationService.sendSubscriptionExpirationWarningEmail(
             profile.email,
             profile.fullName || 'Quý khách',
-            plan?.name || 'Gói dịch vụ',
-            1, // 1 ngày
+            plan?.name.value || 'Gói dịch vụ',
+            SUBSCRIPTION_EXPIRATION_WARNING_DAYS,
           );
         }
         this.logger.log(

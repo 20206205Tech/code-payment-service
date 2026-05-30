@@ -21,7 +21,7 @@ describe('OutboxRelayCron', () => {
     } as unknown as jest.Mocked<Repository<OutboxEntity>>;
     messageBroker = {
       publishSubscriptionPurchased: jest.fn(),
-    } as unknown as jest.Mocked<MessageBrokerPort>;
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,8 +47,8 @@ describe('OutboxRelayCron', () => {
       subscriptionId: 'sub-1',
       userId: 'user-1',
       planId: 'plan-1',
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
+      periodStart: new Date().toISOString(),
+      periodEnd: new Date().toISOString(),
     };
 
     outboxRepo.find.mockResolvedValue([mockMsg]);
@@ -72,8 +72,8 @@ describe('OutboxRelayCron', () => {
       subscriptionId: 's',
       userId: 'u',
       planId: 'p',
-      startDate: '',
-      endDate: '',
+      periodStart: '',
+      periodEnd: '',
     };
 
     outboxRepo.find.mockResolvedValue([mockMsg]);

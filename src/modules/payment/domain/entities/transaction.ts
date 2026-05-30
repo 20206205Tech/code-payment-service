@@ -1,9 +1,9 @@
-import { UserId, BaseVersionAggregateRoot } from '@20206205tech/nestjs-common';
+import { BaseVersionAggregateRoot, UserId } from '@20206205tech/nestjs-common';
 import { Money } from '../value-objects/money';
+import { PaymentStatus } from '../value-objects/payment-status';
 import { PlanId } from '../value-objects/plan-id';
 import { SubscriptionId } from '../value-objects/subscription-id';
 import { TransactionId } from '../value-objects/transaction-id';
-import { PaymentStatus } from '../value-objects/payment-status';
 
 export interface TransactionProps {
   id: TransactionId;
@@ -15,7 +15,7 @@ export interface TransactionProps {
   finalAmount: Money;
   transactionRef: string;
   paymentMethod: string;
-  paymentStatus: PaymentStatus;
+  paymentStatus: PaymentStatus | string;
   providerTransactionId: string | null;
   paymentMetadata: Record<string, unknown>;
   paidAt: Date | null;
@@ -51,7 +51,7 @@ export class Transaction extends BaseVersionAggregateRoot {
     this._finalAmount = props.finalAmount;
     this._transactionRef = props.transactionRef;
     this._paymentMethod = props.paymentMethod;
-    this._paymentStatus = props.paymentStatus;
+    this._paymentStatus = props.paymentStatus as PaymentStatus;
     this._providerTransactionId = props.providerTransactionId;
     this._paymentMetadata = props.paymentMetadata;
     this._paidAt = props.paidAt;
@@ -85,7 +85,7 @@ export class Transaction extends BaseVersionAggregateRoot {
       paidAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1,
+      version: 0,
     });
   }
 
@@ -94,16 +94,19 @@ export class Transaction extends BaseVersionAggregateRoot {
   }
 
   public markSuccess(): void {
+    this.incrementVersion();
     this._paymentStatus = PaymentStatus.SUCCESS;
     this._updatedAt = new Date();
   }
 
   public markFailed(): void {
+    this.incrementVersion();
     this._paymentStatus = PaymentStatus.FAILED;
     this._updatedAt = new Date();
   }
 
   public markExpired(): void {
+    this.incrementVersion();
     this._paymentStatus = PaymentStatus.EXPIRED;
     this._updatedAt = new Date();
   }

@@ -1,9 +1,11 @@
-import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
-import { GetDetailPlanQueryHandler } from './get-detail-plan.query-handler';
-import { GetDetailPlanQuery } from './get-detail-plan.query';
 import { Plan } from '../../domain/entities/plan';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
 import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanName } from '../../domain/value-objects/plan-name';
 import { PlanRepositoryPort } from '../ports/database/plan.repository.port';
+import { GetDetailPlanQuery } from './get-detail-plan.query';
+import { GetDetailPlanQueryHandler } from './get-detail-plan.query-handler';
 
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
 
@@ -11,7 +13,7 @@ const mockPlanRepo = {
   findById: jest.fn(),
   findAllActive: jest.fn(),
   save: jest.fn(),
-} as unknown as jest.Mocked<PlanRepositoryPort>;
+} satisfies Pick<PlanRepositoryPort, 'findById'>;
 
 describe('GetDetailPlanQueryHandler', () => {
   let handler: GetDetailPlanQueryHandler;
@@ -29,7 +31,12 @@ describe('GetDetailPlanQueryHandler', () => {
   });
 
   it('should return PlanResponseItem when plan found', async () => {
-    const plan = Plan.create('Basic', 12, new Money(500000), true);
+    const plan = Plan.create(
+      new PlanName('Basic'),
+      new PlanDurationMonths(12),
+      new Money(500000),
+      true,
+    );
     mockPlanRepo.findById.mockResolvedValue(plan);
 
     const result = await handler.execute(new GetDetailPlanQuery(PLAN_UUID));
@@ -41,13 +48,18 @@ describe('GetDetailPlanQueryHandler', () => {
   });
 
   it('should call findById with correct PlanId', async () => {
-    const plan = Plan.create('X', 1, new Money(1), true);
+    const plan = Plan.create(
+      new PlanName('Xxx'),
+      new PlanDurationMonths(1),
+      new Money(1),
+      true,
+    );
     mockPlanRepo.findById.mockResolvedValue(plan);
 
     await handler.execute(new GetDetailPlanQuery(PLAN_UUID));
 
-    const arg = mockPlanRepo.findById.mock.calls[0][0];
-
-    expect(arg.value).toBe(PLAN_UUID);
+    expect(mockPlanRepo.findById).toHaveBeenCalledWith(
+      expect.objectContaining({ value: PLAN_UUID }),
+    );
   });
 });

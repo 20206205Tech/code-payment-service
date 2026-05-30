@@ -1,21 +1,32 @@
 /* eslint-disable @typescript-eslint/unbound-method, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
-import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
+import { UserId } from '@20206205tech/nestjs-common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
-import { PurchaseSubscriptionCommandHandler } from './purchase-subscription.command-handler';
-import { PurchaseSubscriptionCommand } from './purchase-subscription.command';
-import { Plan } from '../../domain/entities/plan';
-import { Money } from '../../domain/value-objects/money';
 import { PlanRepositoryPort } from '../../application/ports/database/plan.repository.port';
 import { SubscriptionRepositoryPort } from '../../application/ports/database/subscription.repository.port';
 import { TransactionRepositoryPort } from '../../application/ports/database/transaction.repository.port';
 import { PaymentGatewayPort } from '../../application/ports/payment/payment-gateway.port';
+import { Plan } from '../../domain/entities/plan';
+import { Subscription } from '../../domain/entities/subscription';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
+import { PaymentDomainService } from '../../domain/services/payment.domain-service';
+import { Money } from '../../domain/value-objects/money';
+import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
+import { PlanId } from '../../domain/value-objects/plan-id';
+import { PlanName } from '../../domain/value-objects/plan-name';
+import { PurchaseSubscriptionCommand } from './purchase-subscription.command';
+import { PurchaseSubscriptionCommandHandler } from './purchase-subscription.command-handler';
 
 const USER_UUID = '11111111-1111-1111-8111-111111111111';
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
 
 function makeActivePlan(): Plan {
-  return Plan.create('Pro Monthly', 1, new Money(99000), true);
+  return Plan.create(
+    new PlanName('Pro Monthly'),
+    new PlanDurationMonths(1),
+    new Money(99000),
+    true,
+  );
 }
 
 const mockPlanRepo = {
@@ -25,7 +36,8 @@ const mockPlanRepo = {
 } as unknown as jest.Mocked<PlanRepositoryPort>;
 const mockSubscriptionRepo = {
   findById: jest.fn(),
-  findActiveByUserId: jest.fn(),
+  findByUserId: jest.fn().mockResolvedValue(null),
+  findLatestActiveSubscription: jest.fn(),
   isFirstPurchase: jest.fn(),
   deactivateOtherSubscriptions: jest.fn(),
   findActiveExpiringBefore: jest.fn(),
@@ -53,6 +65,13 @@ const mockConfigService = {
   get: jest.fn().mockReturnValue('vnpay'),
 } as unknown as jest.Mocked<ConfigService>;
 
+const mockPaymentDomainService = {
+  prepareSubscriptionForPurchase: jest.fn(),
+  expirePayment: jest.fn(),
+  fulfillPayment: jest.fn(),
+  failPayment: jest.fn(),
+} as unknown as jest.Mocked<PaymentDomainService>;
+
 describe('PurchaseSubscriptionCommandHandler', () => {
   let handler: PurchaseSubscriptionCommandHandler;
 
@@ -65,6 +84,7 @@ describe('PurchaseSubscriptionCommandHandler', () => {
       mockPaymentGateway,
       mockPaymentQueue,
       mockConfigService,
+      mockPaymentDomainService,
     );
   });
 
@@ -85,7 +105,12 @@ describe('PurchaseSubscriptionCommandHandler', () => {
   });
 
   it('should throw PlanNotFoundException when plan is inactive', async () => {
-    const plan = Plan.create('Old', 1, new Money(99000), false);
+    const plan = Plan.create(
+      new PlanName('Old'),
+      new PlanDurationMonths(1),
+      new Money(99000),
+      false,
+    );
     mockPlanRepo.findById.mockResolvedValue(plan);
 
     await expect(
@@ -104,8 +129,19 @@ describe('PurchaseSubscriptionCommandHandler', () => {
   it('should create subscription, transaction, add queue job, and return payment URL', async () => {
     const plan = makeActivePlan();
     const paymentUrl = 'https://payment.example.com/pay?ref=XYZ';
+    const newSubscription = Subscription.create(
+      new UserId(USER_UUID),
+      new PlanId(PLAN_UUID),
+      new Date(),
+      new Date(),
+    );
 
     mockPlanRepo.findById.mockResolvedValue(plan);
+    mockSubscriptionRepo.findByUserId.mockResolvedValue(null);
+    mockPaymentDomainService.prepareSubscriptionForPurchase.mockReturnValue({
+      subscription: newSubscription,
+      isNew: true,
+    });
     mockSubscriptionRepo.save.mockResolvedValue(undefined);
     mockTransactionRepo.save.mockResolvedValue(undefined);
     mockPaymentQueue.add.mockResolvedValue({} as unknown as any);
@@ -122,6 +158,9 @@ describe('PurchaseSubscriptionCommandHandler', () => {
     );
 
     expect(result).toBe(paymentUrl);
+    expect(
+      mockPaymentDomainService.prepareSubscriptionForPurchase,
+    ).toHaveBeenCalledWith(null, expect.any(UserId), expect.any(PlanId), plan);
     expect(mockSubscriptionRepo.save).toHaveBeenCalledTimes(1);
     expect(mockTransactionRepo.save).toHaveBeenCalledTimes(1);
     expect(mockPaymentQueue.add).toHaveBeenCalledTimes(1);
@@ -133,11 +172,22 @@ describe('PurchaseSubscriptionCommandHandler', () => {
 
   it('should rollback subscription and transaction on gateway error', async () => {
     const plan = makeActivePlan();
+    const newSubscription = Subscription.create(
+      new UserId(USER_UUID),
+      new PlanId(PLAN_UUID),
+      new Date(),
+      new Date(),
+    );
 
     mockPlanRepo.findById.mockResolvedValue(plan);
+    mockSubscriptionRepo.findByUserId.mockResolvedValue(null);
+    mockPaymentDomainService.prepareSubscriptionForPurchase.mockReturnValue({
+      subscription: newSubscription,
+      isNew: true,
+    });
     mockSubscriptionRepo.save.mockResolvedValue(undefined);
     mockTransactionRepo.save.mockResolvedValue(undefined);
-    mockPaymentQueue.add.mockResolvedValue(undefined);
+    mockPaymentQueue.add.mockResolvedValue({} as any);
     mockPaymentGateway.createPaymentUrl.mockRejectedValue(
       new Error('Gateway down'),
     );

@@ -34,16 +34,17 @@ import { PaymentModule } from './modules/payment/payment.module';
         autoLoadEntities: true,
         synchronize: configService.get<string>('ENVIRONMENT') === 'test',
         logging:
+          // false,
           configService.getOrThrow<string>('ENVIRONMENT') === 'development',
         ssl:
           configService.getOrThrow<string>('ENVIRONMENT') === 'test'
             ? false
-            : true,
+            : { rejectUnauthorized: false },
         extra: {
-          ssl:
-            configService.getOrThrow<string>('ENVIRONMENT') === 'test'
-              ? false
-              : { rejectUnauthorized: false },
+          //  ssl:
+          //   configService.getOrThrow<string>('ENVIRONMENT') === 'test'
+          //     ? false
+          //     : { rejectUnauthorized: false },
           max: 10,
           // Tăng thời gian chờ lên 15s để Neon có đủ thời gian "thức dậy" (cold start)
           connectionTimeoutMillis: 15000,
