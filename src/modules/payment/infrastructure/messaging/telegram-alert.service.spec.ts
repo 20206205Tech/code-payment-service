@@ -2,10 +2,8 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TelegramAlertService } from './telegram-alert.service';
 
-const mockHostname = jest.fn(() => 'test-host');
-
 jest.mock('node:os', () => ({
-  hostname: mockHostname,
+  hostname: jest.fn(() => 'test-host'),
 }));
 
 describe('TelegramAlertService', () => {
@@ -31,7 +29,6 @@ describe('TelegramAlertService', () => {
       .spyOn(Logger.prototype, 'error')
       .mockImplementation(() => undefined);
     fetchSpy = jest.spyOn(globalThis, 'fetch');
-    mockHostname.mockReturnValue('test-host');
 
     (configService.get as jest.Mock).mockImplementation(
       (key: string, defaultValue?: string) => {
