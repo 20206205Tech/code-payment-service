@@ -3,6 +3,10 @@ import request from 'supertest';
 
 type SuperTestApp = Parameters<typeof request>[0];
 
-export function httpServer(app: INestApplication): SuperTestApp {
+type AppWithHttpServer = INestApplication & {
+  getHttpServer(): SuperTestApp;
+};
+
+export function httpServer(app: AppWithHttpServer): SuperTestApp {
   return app.getHttpServer();
 }
