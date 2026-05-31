@@ -1,9 +1,9 @@
+import { KafkaContainer, StartedKafkaContainer } from '@testcontainers/kafka';
 import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
 import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
-import { KafkaContainer, StartedKafkaContainer } from '@testcontainers/kafka';
 import { VALID_TOKEN } from './constants/bearer-token.constant';
 
 jest.setTimeout(120000);
@@ -118,6 +118,12 @@ afterAll(async () => {
       postgresContainer?.stop().catch((err: any) => {
         console.warn(
           'Warning: Failed to stop PostgreSQL container:',
+          err instanceof Error ? err.message : String(err),
+        );
+      }),
+      redisContainer?.stop().catch((err: any) => {
+        console.warn(
+          'Warning: Failed to stop Redis container:',
           err instanceof Error ? err.message : String(err),
         );
       }),
