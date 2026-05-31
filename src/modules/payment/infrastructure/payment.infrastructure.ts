@@ -2,6 +2,8 @@ import { HttpModule } from '@nestjs/axios';
 import { Provider } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq';
+import { CACHE_PORT } from '../application/ports/cache.port';
 import { VnpayModule } from 'nestjs-vnpay';
 import { PLAN_REPOSITORY_PORT } from '../application/ports/database/plan.repository.port';
 import { SUBSCRIPTION_REPOSITORY_PORT } from '../application/ports/database/subscription.repository.port';
@@ -30,8 +32,9 @@ import { VnpayGatewayService } from './payment/gateway/vnpay-gateway.service';
 import { ZalopayGatewayService } from './payment/gateway/zalopay-gateway.service';
 import { PaymentGatewaySelectorService } from './payment/payment-gateway-selector.service';
 import { SupabaseUserProfileService } from './services/supabase-user-profile.service';
-import { BullModule } from '@nestjs/bullmq';
 import { PAYMENT_QUEUE } from '../domain/value-objects/constants';
+import { RedisCacheAdapter } from './cache/redis-cache.adapter';
+import { CachedPlanRepository } from './database/repositories/cached-plan.repository';
 
 const cronProviders: Provider[] = [
   PlanCleanupCron,
@@ -100,7 +103,14 @@ export const PaymentInfrastructure = {
   ],
   providers: [
     ...PaymentGatewayInfrastructure.providers,
-    { provide: PLAN_REPOSITORY_PORT, useClass: PlanOrmRepository },
+    PlanOrmRepository,
+    {
+      provide: CACHE_PORT,
+      useFactory: (configService: ConfigService) =>
+        new RedisCacheAdapter(configService.getOrThrow<string>('REDIS_URL')),
+      inject: [ConfigService],
+    },
+    { provide: PLAN_REPOSITORY_PORT, useClass: CachedPlanRepository },
     {
       provide: SUBSCRIPTION_REPOSITORY_PORT,
       useClass: SubscriptionOrmRepository,

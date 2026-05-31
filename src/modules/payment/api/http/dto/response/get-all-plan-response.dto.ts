@@ -1,7 +1,15 @@
 import { BaseResponseDto } from '@20206205tech/nestjs-common';
-import { DataGetDetailPlanResponseDto } from './get-detail-plan-response.dto';
 
-// Ở đây trả về một mảng các kế hoạch
-export type DataGetAllPlanResponseDto = DataGetDetailPlanResponseDto[];
+export interface DataGetAllPlanResponseDto {
+  id: string;
+  name: string;
+  durationMonths: number;
+  price: number;
+  features: string[];
+  isActive: boolean;
+  createdAt: Date;
+}
 
-export class GetAllPlanResponseDto extends BaseResponseDto<DataGetAllPlanResponseDto> {}
+export type GetAllPlanResponseData = DataGetAllPlanResponseDto[];
+
+export class GetAllPlanResponseDto extends BaseResponseDto<GetAllPlanResponseData> {}
