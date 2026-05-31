@@ -8,26 +8,10 @@ import {
   mainWithMockAuth,
   userHeader,
 } from '../common/utils/main-with-mock-auth.util';
-
-const ALL_PLANS_CACHE_KEY = `${process.env.ENVIRONMENT ?? 'production'}_payment:plans:active:0:100`;
-
-async function captureRedisCommands<T>(
-  redis: Redis,
-  action: () => Promise<T>,
-): Promise<{ result: T; commands: string[] }> {
-  const commands: string[] = [];
-  const monitor = await redis.monitor();
-  monitor.on('monitor', (_time: number, args: string[]) => {
-    commands.push(args.join(' ').toLowerCase());
-  });
-
-  try {
-    const result = await action();
-    return { result, commands };
-  } finally {
-    monitor.disconnect();
-  }
-}
+import {
+  ALL_PLANS_CACHE_KEY,
+  captureRedisCommands,
+} from '../common/utils/plan-cache-e2e.util';
 
 describe('CreatePlanController (e2e)', () => {
   let app: INestApplication;
