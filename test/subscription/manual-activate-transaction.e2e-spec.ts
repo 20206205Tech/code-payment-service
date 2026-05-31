@@ -11,12 +11,12 @@ import { OutboxRelayCron } from '../../src/modules/payment/infrastructure/cron/o
 import { OutboxEntity } from '../../src/modules/payment/infrastructure/database/entities/outbox.entity';
 import { SubscriptionEntity } from '../../src/modules/payment/infrastructure/database/entities/subscription.entity';
 import { TransactionEntity } from '../../src/modules/payment/infrastructure/database/entities/transaction.entity';
+import { httpServer } from '../common/utils/http-server.util';
 import {
   adminHeader,
   mainWithMockAuth,
   userHeader,
 } from '../common/utils/main-with-mock-auth.util';
-import { httpServer } from '../common/utils/http-server.util';
 
 const TOPIC = 'prod-payment-events'; // ENVIRONMENT=test → không phải 'development'
 
