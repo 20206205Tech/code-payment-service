@@ -1,7 +1,6 @@
 import { ArchivePlanController } from './http/controllers/plan/archive-plan.controller';
 import { CreatePlanController } from './http/controllers/plan/create-plan.controller';
 import { GetAllPlanController } from './http/controllers/plan/get-all-plan.controller';
-import { GetDetailPlanController } from './http/controllers/plan/get-detail-plan.controller';
 
 import { PaymentCallbackController } from './http/controllers/payment/payment-callback.controller';
 import { PaymentReturnController } from './http/controllers/payment/payment-return.controller';
@@ -15,7 +14,6 @@ const planControllers = [
   CreatePlanController,
   ArchivePlanController,
   GetAllPlanController,
-  GetDetailPlanController,
 ];
 
 const subscriptionControllers = [

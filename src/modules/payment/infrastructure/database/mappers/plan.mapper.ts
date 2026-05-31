@@ -1,7 +1,7 @@
 import { Plan } from '../../../domain/entities/plan';
 import { Money } from '../../../domain/value-objects/money';
-import { PlanId } from '../../../domain/value-objects/plan-id';
 import { PlanDurationMonths } from '../../../domain/value-objects/plan-duration-months';
+import { PlanId } from '../../../domain/value-objects/plan-id';
 import { PlanName } from '../../../domain/value-objects/plan-name';
 import { PlanEntity } from '../entities/plan.entity';
 
@@ -12,6 +12,7 @@ export class PlanMapper {
       name: new PlanName(orm.name),
       durationMonths: new PlanDurationMonths(orm.durationMonths),
       price: new Money(Number(orm.price)),
+      features: orm.features,
       isActive: orm.isActive,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
@@ -23,6 +24,7 @@ export class PlanMapper {
     const orm = new PlanEntity();
     orm.id = domain.planId.value;
     orm.name = domain.name.value;
+    orm.features = domain.features;
     orm.durationMonths = domain.durationMonths.value;
     orm.price = domain.price.amount;
     orm.isActive = domain.isActive;

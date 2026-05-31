@@ -1,8 +1,10 @@
 import { HttpModule } from '@nestjs/axios';
+import { BullModule } from '@nestjs/bullmq';
 import { Provider } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { VnpayModule } from 'nestjs-vnpay';
+import { CACHE_PORT } from '../application/ports/cache.port';
 import { PLAN_REPOSITORY_PORT } from '../application/ports/database/plan.repository.port';
 import { SUBSCRIPTION_REPOSITORY_PORT } from '../application/ports/database/subscription.repository.port';
 import { TRANSACTION_REPOSITORY_PORT } from '../application/ports/database/transaction.repository.port';
@@ -10,6 +12,8 @@ import { EMAIL_SENDER_PORT } from '../application/ports/email/email-sender.port'
 import { MESSAGE_BROKER_PORT } from '../application/ports/messaging/message-broker.port';
 import { PAYMENT_GATEWAY_PORT } from '../application/ports/payment/payment-gateway.port';
 import { USER_PROFILE_PORT } from '../application/ports/service/user-profile.port';
+import { PAYMENT_QUEUE } from '../domain/value-objects/constants';
+import { RedisCacheAdapter } from './cache/redis-cache.adapter';
 import { OutboxRelayCron } from './cron/outbox-relay.cron';
 import { PlanCleanupCron } from './cron/plan-cleanup.cron';
 import { SubscriptionExpirationCron } from './cron/subscription-expiration.cron';
@@ -18,6 +22,7 @@ import { OutboxEntity } from './database/entities/outbox.entity';
 import { PlanEntity } from './database/entities/plan.entity';
 import { SubscriptionEntity } from './database/entities/subscription.entity';
 import { TransactionEntity } from './database/entities/transaction.entity';
+import { CachedPlanRepository } from './database/repositories/cached-plan.repository';
 import { PlanOrmRepository } from './database/repositories/plan.orm-repository';
 import { SubscriptionOrmRepository } from './database/repositories/subscription.orm-repository';
 import { TransactionOrmRepository } from './database/repositories/transaction.orm-repository';
@@ -30,8 +35,6 @@ import { VnpayGatewayService } from './payment/gateway/vnpay-gateway.service';
 import { ZalopayGatewayService } from './payment/gateway/zalopay-gateway.service';
 import { PaymentGatewaySelectorService } from './payment/payment-gateway-selector.service';
 import { SupabaseUserProfileService } from './services/supabase-user-profile.service';
-import { BullModule } from '@nestjs/bullmq';
-import { PAYMENT_QUEUE } from '../domain/value-objects/constants';
 
 const cronProviders: Provider[] = [
   PlanCleanupCron,
@@ -100,7 +103,14 @@ export const PaymentInfrastructure = {
   ],
   providers: [
     ...PaymentGatewayInfrastructure.providers,
-    { provide: PLAN_REPOSITORY_PORT, useClass: PlanOrmRepository },
+    PlanOrmRepository,
+    {
+      provide: CACHE_PORT,
+      useFactory: (configService: ConfigService) =>
+        new RedisCacheAdapter(configService.getOrThrow<string>('REDIS_URL')),
+      inject: [ConfigService],
+    },
+    { provide: PLAN_REPOSITORY_PORT, useClass: CachedPlanRepository },
     {
       provide: SUBSCRIPTION_REPOSITORY_PORT,
       useClass: SubscriptionOrmRepository,

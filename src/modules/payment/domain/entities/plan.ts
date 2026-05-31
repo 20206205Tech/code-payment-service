@@ -1,4 +1,5 @@
 import { BaseVersionAggregateRoot } from '@20206205tech/nestjs-common';
+import { DEFAULT_PLAN_FEATURES } from '../value-objects/constants';
 import { Money } from '../value-objects/money';
 import { PlanDurationMonths } from '../value-objects/plan-duration-months';
 import { PlanId } from '../value-objects/plan-id';
@@ -10,6 +11,7 @@ export interface PlanProps {
   durationMonths: PlanDurationMonths;
   price: Money;
   isActive: boolean;
+  features?: string[];
   createdAt: Date;
   updatedAt: Date;
   version?: number;
@@ -20,6 +22,7 @@ export class Plan extends BaseVersionAggregateRoot {
   private readonly _name: PlanName;
   private readonly _durationMonths: PlanDurationMonths;
   private _price: Money;
+  private readonly _features: string[];
   private _updatedAt: Date;
 
   private constructor(props: PlanProps) {
@@ -28,6 +31,7 @@ export class Plan extends BaseVersionAggregateRoot {
     this._name = props.name;
     this._durationMonths = props.durationMonths;
     this._price = props.price;
+    this._features = props.features ?? DEFAULT_PLAN_FEATURES;
     this._updatedAt = props.updatedAt;
   }
 
@@ -36,6 +40,7 @@ export class Plan extends BaseVersionAggregateRoot {
     durationMonths: PlanDurationMonths,
     price: Money,
     isActive: boolean = true,
+    features: string[] = DEFAULT_PLAN_FEATURES,
   ): Plan {
     return new Plan({
       id: PlanId.create(),
@@ -43,6 +48,7 @@ export class Plan extends BaseVersionAggregateRoot {
       durationMonths,
       price,
       isActive,
+      features,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -71,6 +77,11 @@ export class Plan extends BaseVersionAggregateRoot {
   get price(): Money {
     return this._price;
   }
+
+  get features(): string[] {
+    return this._features;
+  }
+
   get isActive(): boolean {
     return this._isActive;
   }

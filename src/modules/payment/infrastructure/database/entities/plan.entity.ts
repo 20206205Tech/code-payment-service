@@ -14,6 +14,14 @@ export class PlanEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({
+    name: 'features',
+    type: 'text',
+    array: true,
+    default: () => "'{}'",
+  })
+  features: string[];
+
   @Column({ name: 'duration_months', type: 'int' })
   durationMonths: number;
 

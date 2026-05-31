@@ -1,11 +1,11 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DomainExceptionFilter } from '@20206205tech/nestjs-common';
+import { INestApplication, Type, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EMAIL_SENDER_PORT } from '../../../src/modules/payment/application/ports/email/email-sender.port';
 import { USER_PROFILE_PORT } from '../../../src/modules/payment/application/ports/service/user-profile.port';
 import { PaymentTimeoutProcessor } from '../../../src/modules/payment/application/processors/payment-timeout.processor';
 
-export async function main(module: any): Promise<INestApplication> {
+export async function main(module: Type<unknown>): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [module],
   })

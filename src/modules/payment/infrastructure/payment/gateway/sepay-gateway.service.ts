@@ -2,12 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import { PaymentProvider } from '../payment-provider.enum';
 import {
   IpnVerifyResult,
   PaymentGatewayPort,
   PaymentInput,
 } from '../../../application/ports/payment/payment-gateway.port';
+import { PaymentProvider } from '../payment-provider.enum';
 import { getPaymentCallbackUrl, getPaymentReturnUrl } from './url-helper';
 
 @Injectable()
@@ -104,6 +104,7 @@ export class SepayGatewayService implements PaymentGatewayPort {
       }
       throw new Error(
         `SePay implementation error: ${err.message ?? 'Unknown error'}`,
+        { cause: error },
       );
     }
   }

@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { httpServer } from '../common/utils/http-server.util';
 import { mainWithMockAuth } from '../common/utils/main-with-mock-auth.util';
 
 describe('PaymentReturnController (e2e)', () => {
@@ -16,7 +17,7 @@ describe('PaymentReturnController (e2e)', () => {
 
   describe('GET/POST /subscriptions/payment-return/:provider', () => {
     it('should handle VNPay return (GET)', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .get('/code-payment-service/subscriptions/payment-return/vnpay')
         .query({ vnp_ResponseCode: '00', vnp_TxnRef: '789' })
         .expect(200);
