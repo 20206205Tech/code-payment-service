@@ -13,6 +13,7 @@ import Redis from 'ioredis';
 import { RedisCacheAdapter } from './redis-cache.adapter';
 
 const RedisMock = Redis as unknown as jest.Mock;
+const PLAN_CACHE_PREFIX = `${process.env.ENVIRONMENT ?? 'production'}_payment:plans`;
 
 describe('RedisCacheAdapter', () => {
   let adapter: RedisCacheAdapter;
@@ -81,16 +82,16 @@ describe('RedisCacheAdapter', () => {
   it('should delete keys matching a pattern', async () => {
     redisClientMock.keys.mockResolvedValue(['a', 'b']);
 
-    await adapter.delByPattern('payment:plans:*');
+    await adapter.delByPattern(`${PLAN_CACHE_PREFIX}:*`);
 
-    expect(redisClientMock.keys).toHaveBeenCalledWith('payment:plans:*');
+    expect(redisClientMock.keys).toHaveBeenCalledWith(`${PLAN_CACHE_PREFIX}:*`);
     expect(redisClientMock.del).toHaveBeenCalledWith('a', 'b');
   });
 
   it('should skip delete when pattern matches nothing', async () => {
     redisClientMock.keys.mockResolvedValue([]);
 
-    await adapter.delByPattern('payment:plans:*');
+    await adapter.delByPattern(`${PLAN_CACHE_PREFIX}:*`);
 
     expect(redisClientMock.del).not.toHaveBeenCalled();
   });

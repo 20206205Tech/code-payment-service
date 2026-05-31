@@ -1,13 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { TelegramAlertService } from './telegram-alert.service';
 
 const mockHostname = jest.fn(() => 'test-host');
 
 jest.mock('node:os', () => ({
   hostname: mockHostname,
 }));
-
-import { TelegramAlertService } from './telegram-alert.service';
 
 describe('TelegramAlertService', () => {
   let configService: jest.Mocked<ConfigService>;
@@ -156,5 +155,11 @@ describe('TelegramAlertService', () => {
       event: 'subscription.purchased',
       totalAttempts: 2,
       maxRetries: 5,
-
       payload: { id: 'payload-1' },
+    });
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Failed to send Telegram alert: Error: network down',
+    );
+  });
+});

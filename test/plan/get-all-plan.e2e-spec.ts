@@ -5,7 +5,7 @@ import { AppModule } from '../../src/app.module';
 import { httpServer } from '../common/utils/http-server.util';
 import { mainWithMockAuth } from '../common/utils/main-with-mock-auth.util';
 
-const ALL_PLANS_CACHE_KEY = 'payment:plans:active:0:100';
+const ALL_PLANS_CACHE_KEY = `${process.env.ENVIRONMENT ?? 'production'}_payment:plans:active:0:100`;
 
 async function captureRedisCommands<T>(
   redis: Redis,

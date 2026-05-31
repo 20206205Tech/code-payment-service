@@ -1,5 +1,9 @@
 import type { CachePort } from '../../../application/ports/cache.port';
 import { Plan } from '../../../domain/entities/plan';
+import {
+  getPlanCachePrefix,
+  PLAN_CACHE_TTL_SECONDS,
+} from '../../../domain/value-objects/constants';
 import { Money } from '../../../domain/value-objects/money';
 import { PlanDurationMonths } from '../../../domain/value-objects/plan-duration-months';
 import { PlanId } from '../../../domain/value-objects/plan-id';
@@ -8,6 +12,7 @@ import { CachedPlanRepository } from './cached-plan.repository';
 import { PlanOrmRepository } from './plan.orm-repository';
 
 const PLAN_UUID = '22222222-2222-2222-8222-222222222222';
+const PLAN_CACHE_PREFIX = getPlanCachePrefix();
 
 function createPlan(name = 'Pro'): Plan {
   return Plan.create(
@@ -94,12 +99,12 @@ describe('CachedPlanRepository', () => {
         expect.objectContaining({ value: PLAN_UUID }),
       );
       expect(cacheSetMock).toHaveBeenCalledWith(
-        `payment:plans:by-id:${PLAN_UUID}`,
+        `${PLAN_CACHE_PREFIX}:by-id:${PLAN_UUID}`,
         expect.objectContaining({
           id: plan.planId.value,
           features: plan.features,
         }),
-        3600,
+        PLAN_CACHE_TTL_SECONDS,
       );
     });
   });
@@ -126,9 +131,9 @@ describe('CachedPlanRepository', () => {
       expect(result).toEqual([plan]);
       expect(findAllActiveMock).toHaveBeenCalledWith(0, 100);
       expect(cacheSetMock).toHaveBeenCalledWith(
-        'payment:plans:active:0:100',
+        `${PLAN_CACHE_PREFIX}:active:0:100`,
         [expect.objectContaining({ id: plan.planId.value })],
-        3600,
+        PLAN_CACHE_TTL_SECONDS,
       );
     });
   });
@@ -140,7 +145,9 @@ describe('CachedPlanRepository', () => {
       await repository.save(plan);
 
       expect(saveMock).toHaveBeenCalledWith(plan);
-      expect(cacheDelByPatternMock).toHaveBeenCalledWith('payment:plans:*');
+      expect(cacheDelByPatternMock).toHaveBeenCalledWith(
+        `${PLAN_CACHE_PREFIX}:*`,
+      );
     });
   });
 });

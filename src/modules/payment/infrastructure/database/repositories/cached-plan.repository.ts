@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CACHE_PORT } from '../../../application/ports/cache.port';
 import type { CachePort } from '../../../application/ports/cache.port';
+import { CACHE_PORT } from '../../../application/ports/cache.port';
 import { PlanRepositoryPort } from '../../../application/ports/database/plan.repository.port';
 import { Plan } from '../../../domain/entities/plan';
+import {
+  getPlanCachePrefix,
+  PLAN_CACHE_TTL_SECONDS,
+} from '../../../domain/value-objects/constants';
 import { PlanId } from '../../../domain/value-objects/plan-id';
 import { PlanEntity } from '../entities/plan.entity';
 import { PlanMapper } from '../mappers/plan.mapper';
 import { PlanOrmRepository } from './plan.orm-repository';
-
-const ALL_ACTIVE_PLANS_CACHE_PREFIX = 'payment:plans:active';
-const PLAN_BY_ID_CACHE_PREFIX = 'payment:plans:by-id';
-const PLAN_CACHE_TTL_SECONDS = 3600;
 
 type CachedPlanEntity = {
   id: string;
@@ -32,7 +32,7 @@ export class CachedPlanRepository implements PlanRepositoryPort {
   ) {}
 
   async findById(id: PlanId): Promise<Plan | null> {
-    const cacheKey = `${PLAN_BY_ID_CACHE_PREFIX}:${id.value}`;
+    const cacheKey = `${getPlanCachePrefix()}:by-id:${id.value}`;
     const cached = await this.cache.get<CachedPlanEntity>(cacheKey);
     if (cached) {
       return PlanMapper.toDomain(this.fromCache(cached));
@@ -46,7 +46,7 @@ export class CachedPlanRepository implements PlanRepositoryPort {
   }
 
   async findAllActive(skip: number = 0, limit: number = 20): Promise<Plan[]> {
-    const cacheKey = `${ALL_ACTIVE_PLANS_CACHE_PREFIX}:${skip}:${limit}`;
+    const cacheKey = `${getPlanCachePrefix()}:active:${skip}:${limit}`;
     const cached = await this.cache.get<CachedPlanEntity[]>(cacheKey);
     if (cached) {
       return cached.map((item) => PlanMapper.toDomain(this.fromCache(item)));
@@ -64,7 +64,7 @@ export class CachedPlanRepository implements PlanRepositoryPort {
 
   async save(plan: Plan): Promise<void> {
     await this.planRepository.save(plan);
-    await this.cache.delByPattern('payment:plans:*');
+    await this.cache.delByPattern(`${getPlanCachePrefix()}:*`);
   }
 
   private toCache(plan: Plan): CachedPlanEntity {
