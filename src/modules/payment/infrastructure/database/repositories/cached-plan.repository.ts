@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CachePort, CACHE_PORT } from '../../../application/ports/cache.port';
+import { CACHE_PORT } from '../../../application/ports/cache.port';
+import type { CachePort } from '../../../application/ports/cache.port';
 import { PlanRepositoryPort } from '../../../application/ports/database/plan.repository.port';
 import { Plan } from '../../../domain/entities/plan';
 import { PlanId } from '../../../domain/value-objects/plan-id';

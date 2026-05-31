@@ -19,7 +19,11 @@ export class RedisCacheAdapter implements CachePort {
     }
   }
 
-  async set(key: string, value: unknown, ttlSeconds: number = 3600): Promise<void> {
+  async set(
+    key: string,
+    value: unknown,
+    ttlSeconds: number = 3600,
+  ): Promise<void> {
     await this.redisClient.set(key, JSON.stringify(value), 'EX', ttlSeconds);
   }
 
