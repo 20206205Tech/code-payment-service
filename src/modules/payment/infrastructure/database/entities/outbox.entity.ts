@@ -21,7 +21,7 @@ export class OutboxEntity {
   eventType: string; // Tên Event (VD: 'ChatDeletedEvent')
 
   @Column({ name: 'payload', type: 'jsonb' })
-  payload: any; // Dữ liệu sẽ gửi qua RabbitMQ
+  payload: unknown; // Dữ liệu sẽ gửi qua RabbitMQ
 
   @Column({ name: 'status', type: 'varchar', length: 20, default: 'PENDING' })
   status: string; // PENDING, DONE, FAILED

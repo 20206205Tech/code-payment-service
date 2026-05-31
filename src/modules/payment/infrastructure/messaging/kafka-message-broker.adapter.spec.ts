@@ -24,10 +24,13 @@ describe('KafkaMessageBrokerAdapter', () => {
 
   beforeEach(async () => {
     configService = {
-      getOrThrow: jest.fn((key: string) => {
+      get: jest.fn((key: string) => {
         if (key === 'KAFKA_SSL_CA') return 'ca';
         if (key === 'KAFKA_SSL_CERT') return 'cert';
         if (key === 'KAFKA_SSL_KEY') return 'key';
+        return '';
+      }),
+      getOrThrow: jest.fn((key: string) => {
         if (key === 'KAFKA_BROKER') return 'broker';
         return '';
       }),

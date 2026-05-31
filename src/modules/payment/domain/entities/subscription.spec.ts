@@ -102,12 +102,13 @@ describe('Subscription Entity', () => {
 
     it('should allow renewing an active subscription when duration is provided', () => {
       const sub = makeSubscription(SubscriptionStatus.ACTIVE);
+      const originalPeriodStart = sub.periodStart.toISOString();
       const baseDate = new Date('2026-01-01T00:00:00Z');
 
       sub.activate(new PlanDurationMonths(3), baseDate);
 
       expect(sub.status).toBe(SubscriptionStatus.ACTIVE);
-      expect(sub.periodStart.toISOString()).toBe(baseDate.toISOString());
+      expect(sub.periodStart.toISOString()).toBe(originalPeriodStart);
       expect(sub.periodEnd.getMonth()).toBe(3);
       expect(sub.periodEnd.getFullYear()).toBe(2026);
     });

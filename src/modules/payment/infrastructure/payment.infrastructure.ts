@@ -23,6 +23,7 @@ import { SubscriptionOrmRepository } from './database/repositories/subscription.
 import { TransactionOrmRepository } from './database/repositories/transaction.orm-repository';
 import { BrevoNotificationAdapter } from './email/brevo-notification.adapter';
 import { KafkaMessageBrokerAdapter } from './messaging/kafka-message-broker.adapter';
+import { TelegramAlertService } from './messaging/telegram-alert.service';
 import { MomoGatewayService } from './payment/gateway/momo-gateway.service';
 import { SepayGatewayService } from './payment/gateway/sepay-gateway.service';
 import { VnpayGatewayService } from './payment/gateway/vnpay-gateway.service';
@@ -111,6 +112,7 @@ export const PaymentInfrastructure = {
     { provide: EMAIL_SENDER_PORT, useClass: BrevoNotificationAdapter },
     { provide: USER_PROFILE_PORT, useClass: SupabaseUserProfileService },
     { provide: MESSAGE_BROKER_PORT, useClass: KafkaMessageBrokerAdapter },
+    TelegramAlertService,
     ...cronProviders,
   ] as Provider[],
 };

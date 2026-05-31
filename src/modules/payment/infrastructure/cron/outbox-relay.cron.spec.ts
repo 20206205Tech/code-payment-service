@@ -7,20 +7,39 @@ import {
   MessageBrokerPort,
 } from '../../application/ports/messaging/message-broker.port';
 import { OutboxEntity } from '../database/entities/outbox.entity';
+import { TelegramAlertService } from '../messaging/telegram-alert.service';
 import { OutboxRelayCron } from './outbox-relay.cron';
 
 describe('OutboxRelayCron', () => {
   let cron: OutboxRelayCron;
   let outboxRepo: jest.Mocked<Repository<OutboxEntity>>;
   let messageBroker: jest.Mocked<MessageBrokerPort>;
+  let queryBuilder: {
+    where: jest.Mock;
+    orWhere: jest.Mock;
+    orderBy: jest.Mock;
+    take: jest.Mock;
+    getMany: jest.Mock;
+  };
 
   beforeEach(async () => {
+    queryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getMany: jest.fn(),
+    };
+
     outboxRepo = {
-      find: jest.fn(),
+      createQueryBuilder: jest.fn(() => queryBuilder),
       save: jest.fn(),
     } as unknown as jest.Mocked<Repository<OutboxEntity>>;
     messageBroker = {
       publishSubscriptionPurchased: jest.fn(),
+    };
+    const telegramAlert = {
+      sendDLQAlert: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +47,7 @@ describe('OutboxRelayCron', () => {
         OutboxRelayCron,
         { provide: getRepositoryToken(OutboxEntity), useValue: outboxRepo },
         { provide: MESSAGE_BROKER_PORT, useValue: messageBroker },
+        { provide: TelegramAlertService, useValue: telegramAlert },
       ],
     }).compile();
 
@@ -49,15 +69,16 @@ describe('OutboxRelayCron', () => {
       planId: 'plan-1',
       periodStart: new Date().toISOString(),
       periodEnd: new Date().toISOString(),
+      version: 1,
     };
 
-    outboxRepo.find.mockResolvedValue([mockMsg]);
+    queryBuilder.getMany.mockResolvedValue([mockMsg]);
     messageBroker.publishSubscriptionPurchased.mockResolvedValue(undefined);
     outboxRepo.save.mockResolvedValue(undefined);
 
     await cron.processOutboxMessages();
 
-    expect(outboxRepo.find).toHaveBeenCalled();
+    expect(outboxRepo.createQueryBuilder).toHaveBeenCalledWith('outbox');
     expect(messageBroker.publishSubscriptionPurchased).toHaveBeenCalled();
     expect(mockMsg.status).toBe('DONE');
     expect(outboxRepo.save).toHaveBeenCalledWith(mockMsg);
@@ -74,9 +95,10 @@ describe('OutboxRelayCron', () => {
       planId: 'p',
       periodStart: '',
       periodEnd: '',
+      version: 1,
     };
 
-    outboxRepo.find.mockResolvedValue([mockMsg]);
+    queryBuilder.getMany.mockResolvedValue([mockMsg]);
     messageBroker.publishSubscriptionPurchased.mockRejectedValue(
       new Error('Kafka Down'),
     );
@@ -93,7 +115,7 @@ describe('OutboxRelayCron', () => {
     mockMsg.eventType = 'UnknownEvent';
     mockMsg.status = 'PENDING';
 
-    outboxRepo.find.mockResolvedValue([mockMsg]);
+    queryBuilder.getMany.mockResolvedValue([mockMsg]);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const loggerSpy = jest.spyOn((cron as any).logger, 'warn');
 
