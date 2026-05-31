@@ -30,10 +30,7 @@ describe('TelegramAlertService', () => {
     errorSpy = jest
       .spyOn(Logger.prototype, 'error')
       .mockImplementation(() => undefined);
-    fetchSpy = jest.spyOn(
-      globalThis as typeof globalThis & { fetch: typeof fetch },
-      'fetch',
-    );
+    fetchSpy = jest.spyOn(globalThis, 'fetch');
     mockHostname.mockReturnValue('test-host');
 
     (configService.get as jest.Mock).mockImplementation(
