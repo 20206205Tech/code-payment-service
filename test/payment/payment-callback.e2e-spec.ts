@@ -17,6 +17,7 @@ import { OutboxEntity } from '../../src/modules/payment/infrastructure/database/
 import { PlanEntity } from '../../src/modules/payment/infrastructure/database/entities/plan.entity';
 import { SubscriptionEntity } from '../../src/modules/payment/infrastructure/database/entities/subscription.entity';
 import { TransactionEntity } from '../../src/modules/payment/infrastructure/database/entities/transaction.entity';
+import { httpServer } from '../common/utils/http-server.util';
 
 const TOPIC = 'prod-payment-events';
 
@@ -102,16 +103,17 @@ describe('PaymentCallbackController (e2e)', () => {
 
   describe('GET/POST /subscriptions/payment-callback/:provider', () => {
     it('should handle VNPay callback (GET)', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .get('/code-payment-service/subscriptions/payment-callback/vnpay')
         .query({ vnp_ResponseCode: '00', vnp_TxnRef: '123' })
         .expect(200);
+
       const body = response.body as { RspCode: string };
       expect(body.RspCode).toBeDefined();
     });
 
     it('should handle MoMo callback (POST)', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .post('/code-payment-service/subscriptions/payment-callback/momo')
         .send({ resultCode: 0, orderId: '456' })
         .expect(200);
@@ -181,7 +183,7 @@ describe('PaymentCallbackController (e2e)', () => {
         },
       });
 
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .get('/code-payment-service/subscriptions/payment-callback/vnpay')
         .query({
           vnp_TxnRef: txnRef,

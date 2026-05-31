@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import Redis from 'ioredis';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { httpServer } from '../common/utils/http-server.util';
 import {
   adminHeader,
   mainWithMockAuth,
@@ -60,7 +61,7 @@ describe('CreatePlanController (e2e)', () => {
       const cachedListBeforeCreate = await captureRedisCommands(
         redis,
         async () =>
-          request(app.getHttpServer())
+          request(httpServer(app))
             .get('/code-payment-service/plans')
             .expect(200),
       );
@@ -71,7 +72,7 @@ describe('CreatePlanController (e2e)', () => {
       );
       expect(await redis.exists(ALL_PLANS_CACHE_KEY)).toBe(1);
 
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .post('/code-payment-service/plans')
         .set(adminHeader())
         .send(payload)
@@ -86,7 +87,7 @@ describe('CreatePlanController (e2e)', () => {
       const cachedListAfterCreate = await captureRedisCommands(
         redis,
         async () =>
-          request(app.getHttpServer())
+          request(httpServer(app))
             .get('/code-payment-service/plans')
             .expect(200),
       );
@@ -98,7 +99,7 @@ describe('CreatePlanController (e2e)', () => {
     });
 
     it('should return 403 as regular user', async () => {
-      await request(app.getHttpServer())
+      await request(httpServer(app))
         .post('/code-payment-service/plans')
         .set(userHeader())
         .send({ name: 'Test', durationMonths: 1, price: 1000 })

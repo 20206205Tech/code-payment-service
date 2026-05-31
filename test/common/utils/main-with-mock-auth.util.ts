@@ -1,14 +1,16 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { JwtAuthGuard, MfaGuard, RolesGuard } from '@20206205tech/nestjs-auth';
 import { DomainExceptionFilter } from '@20206205tech/nestjs-common';
+import { INestApplication, Type, ValidationPipe } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard, RolesGuard, MfaGuard } from '@20206205tech/nestjs-auth';
-import { MockJwtAuthGuard, MockRolesGuard } from '../guards/mock-auth.guard';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EMAIL_SENDER_PORT } from '../../../src/modules/payment/application/ports/email/email-sender.port';
 import { USER_PROFILE_PORT } from '../../../src/modules/payment/application/ports/service/user-profile.port';
 import { PaymentTimeoutProcessor } from '../../../src/modules/payment/application/processors/payment-timeout.processor';
+import { MockJwtAuthGuard, MockRolesGuard } from '../guards/mock-auth.guard';
 
-export async function mainWithMockAuth(module: any): Promise<INestApplication> {
+export async function mainWithMockAuth(
+  module: Type<unknown>,
+): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [module],
   })

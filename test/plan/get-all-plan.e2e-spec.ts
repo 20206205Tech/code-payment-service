@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import Redis from 'ioredis';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { httpServer } from '../common/utils/http-server.util';
 import { mainWithMockAuth } from '../common/utils/main-with-mock-auth.util';
 
 const ALL_PLANS_CACHE_KEY = 'payment:plans:active:0:100';
@@ -47,9 +48,7 @@ describe('GetAllPlanController (e2e)', () => {
       expect(await redis.exists(ALL_PLANS_CACHE_KEY)).toBe(0);
 
       const firstCall = await captureRedisCommands(redis, async () =>
-        request(app.getHttpServer())
-          .get('/code-payment-service/plans')
-          .expect(200),
+        request(httpServer(app)).get('/code-payment-service/plans').expect(200),
       );
 
       expect(await redis.exists(ALL_PLANS_CACHE_KEY)).toBe(1);
@@ -61,9 +60,7 @@ describe('GetAllPlanController (e2e)', () => {
       );
 
       const secondCall = await captureRedisCommands(redis, async () =>
-        request(app.getHttpServer())
-          .get('/code-payment-service/plans')
-          .expect(200),
+        request(httpServer(app)).get('/code-payment-service/plans').expect(200),
       );
 
       expect(secondCall.commands).toEqual(

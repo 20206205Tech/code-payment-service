@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { httpServer } from '../common/utils/http-server.util';
 import {
   mainWithMockAuth,
   userHeader,
@@ -19,7 +20,7 @@ describe('GetTransactionHistoryController (e2e)', () => {
 
   describe('GET /subscriptions/history', () => {
     it('should return transaction history for user', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .get('/code-payment-service/subscriptions/history')
         .set(userHeader())
         .expect(200);
@@ -30,7 +31,7 @@ describe('GetTransactionHistoryController (e2e)', () => {
     });
 
     it('should support pagination', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .get('/code-payment-service/subscriptions/history?skip=0&limit=5')
         .set(userHeader())
         .expect(200);

@@ -16,6 +16,7 @@ import {
   mainWithMockAuth,
   userHeader,
 } from '../common/utils/main-with-mock-auth.util';
+import { httpServer } from '../common/utils/http-server.util';
 
 const TOPIC = 'prod-payment-events'; // ENVIRONMENT=test → không phải 'development'
 
@@ -60,7 +61,7 @@ describe('ManualActivateTransactionController (e2e)', () => {
   });
 
   it('POST /subscriptions/manual-activate/:id — trả 400 khi transaction không tồn tại', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer(app))
       .post(
         '/code-payment-service/subscriptions/manual-activate/123e4567-e89b-42d3-a456-426614174999',
       )
@@ -69,7 +70,7 @@ describe('ManualActivateTransactionController (e2e)', () => {
   });
 
   it('POST /subscriptions/manual-activate/:id — trả 403 khi không phải admin', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer(app))
       .post('/code-payment-service/subscriptions/manual-activate/some-id')
       .set(userHeader())
       .expect(403);
@@ -77,7 +78,7 @@ describe('ManualActivateTransactionController (e2e)', () => {
 
   it('POST /subscriptions/manual-activate/:id — kích hoạt thành công và publish SubscriptionPurchasedEvent lên Kafka', async () => {
     // ── 1. Tạo plan qua API ───────────────────────────────────────────────────
-    const planRes = await request(app.getHttpServer())
+    const planRes = await request(httpServer(app))
       .post('/code-payment-service/plans')
       .set(adminHeader())
       .send({ name: 'Pro Plan', durationMonths: 1, price: 99000 })
@@ -142,7 +143,7 @@ describe('ManualActivateTransactionController (e2e)', () => {
     });
 
     // ── 4. Gọi API manual-activate ───────────────────────────────────────────
-    const activateRes = await request(app.getHttpServer())
+    const activateRes = await request(httpServer(app))
       .post(
         `/code-payment-service/subscriptions/manual-activate/${transactionId}`,
       )

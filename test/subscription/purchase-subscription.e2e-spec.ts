@@ -1,9 +1,10 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { httpServer } from '../common/utils/http-server.util';
 import {
-  mainWithMockAuth,
   adminHeader,
+  mainWithMockAuth,
   userHeader,
 } from '../common/utils/main-with-mock-auth.util';
 
@@ -15,7 +16,7 @@ describe('PurchaseSubscriptionController (e2e)', () => {
     app = await mainWithMockAuth(AppModule);
 
     // Create a plan to purchase
-    const res = await request(app.getHttpServer())
+    const res = await request(httpServer(app))
       .post('/code-payment-service/plans')
       .set(adminHeader())
       .send({ name: 'Subscription Plan', durationMonths: 1, price: 50000 });
@@ -30,7 +31,7 @@ describe('PurchaseSubscriptionController (e2e)', () => {
 
   describe('POST /subscriptions/purchase', () => {
     it('should initiate purchase successfully as user', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .post('/code-payment-service/subscriptions/purchase')
         .set(userHeader())
         .send({
@@ -44,7 +45,7 @@ describe('PurchaseSubscriptionController (e2e)', () => {
     });
 
     it('should return 400 for missing fields', async () => {
-      await request(app.getHttpServer())
+      await request(httpServer(app))
         .post('/code-payment-service/subscriptions/purchase')
         .set(userHeader())
         .send({})

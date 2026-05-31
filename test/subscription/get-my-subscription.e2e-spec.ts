@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
+import { httpServer } from '../common/utils/http-server.util';
 import {
   mainWithMockAuth,
   userHeader,
@@ -19,7 +20,7 @@ describe('GetMySubscriptionController (e2e)', () => {
 
   describe('GET /subscriptions', () => {
     it('should return user subscription successfully', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer(app))
         .get('/code-payment-service/subscriptions')
         .set(userHeader())
         .expect(200);
@@ -30,7 +31,7 @@ describe('GetMySubscriptionController (e2e)', () => {
     });
 
     it('should return 403 when not authenticated', async () => {
-      await request(app.getHttpServer())
+      await request(httpServer(app))
         .get('/code-payment-service/subscriptions')
         .expect(403);
     });
