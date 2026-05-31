@@ -16,7 +16,7 @@ async function captureRedisCommands<T>(
 ): Promise<{ result: T; commands: string[] }> {
   const commands: string[] = [];
   const monitor = await redis.monitor();
-  monitor.on('monitor', (_time, args) => {
+  monitor.on('monitor', (_time: number, args: string[]) => {
     commands.push(args.join(' ').toLowerCase());
   });
 

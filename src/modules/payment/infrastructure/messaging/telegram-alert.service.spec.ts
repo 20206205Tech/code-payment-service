@@ -209,7 +209,7 @@ describe('TelegramAlertService', () => {
       ok: true,
       status: 200,
       text: jest.fn(),
-    } as unknown as Response);
+    });
 
     await service.sendDLQAlert({
       event: 'subscription.purchased',
@@ -230,9 +230,12 @@ describe('TelegramAlertService', () => {
       }),
     );
 
-    const requestBody = JSON.parse(
-      (fetchSpy.mock.calls[0][1] as RequestInit).body as string,
-    ) as { chat_id: string; text: string; parse_mode: string };
+    const [, requestInit] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const requestBody = JSON.parse(requestInit.body as string) as {
+      chat_id: string;
+      text: string;
+      parse_mode: string;
+    };
 
     expect(requestBody.chat_id).toBe('-1001234567890');
     expect(requestBody.parse_mode).toBe('Markdown');
@@ -253,7 +256,7 @@ describe('TelegramAlertService', () => {
       ok: false,
       status: 500,
       text: jest.fn().mockResolvedValue('boom'),
-    } as unknown as Response);
+    });
 
     await service.sendDLQAlert({
       event: 'subscription.purchased',

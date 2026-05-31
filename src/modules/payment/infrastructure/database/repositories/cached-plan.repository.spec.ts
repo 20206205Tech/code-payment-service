@@ -35,22 +35,37 @@ function makeCachedPlan(plan: Plan) {
 
 describe('CachedPlanRepository', () => {
   let planRepository: jest.Mocked<PlanOrmRepository>;
+  let findByIdMock: jest.MockedFunction<PlanOrmRepository['findById']>;
+  let findAllActiveMock: jest.MockedFunction<
+    PlanOrmRepository['findAllActive']
+  >;
+  let saveMock: jest.MockedFunction<PlanOrmRepository['save']>;
   let cache: jest.Mocked<CachePort>;
+  let cacheGetMock: jest.MockedFunction<CachePort['get']>;
+  let cacheSetMock: jest.MockedFunction<CachePort['set']>;
+  let cacheDelByPatternMock: jest.MockedFunction<CachePort['delByPattern']>;
   let repository: CachedPlanRepository;
 
   beforeEach(() => {
+    findByIdMock = jest.fn();
+    findAllActiveMock = jest.fn();
+    saveMock = jest.fn();
+    cacheGetMock = jest.fn();
+    cacheSetMock = jest.fn();
+    cacheDelByPatternMock = jest.fn();
+
     planRepository = {
-      findById: jest.fn(),
-      findAllActive: jest.fn(),
-      save: jest.fn(),
+      findById: findByIdMock,
+      findAllActive: findAllActiveMock,
+      save: saveMock,
     } as unknown as jest.Mocked<PlanOrmRepository>;
 
     cache = {
-      get: jest.fn(),
-      set: jest.fn(),
+      get: cacheGetMock,
+      set: cacheSetMock,
       del: jest.fn(),
-      delByPattern: jest.fn(),
-    } as unknown as jest.Mocked<CachePort>;
+      delByPattern: cacheDelByPatternMock,
+    };
 
     repository = new CachedPlanRepository(planRepository, cache);
   });
@@ -58,27 +73,27 @@ describe('CachedPlanRepository', () => {
   describe('findById()', () => {
     it('should return cached plan and skip database on hit', async () => {
       const plan = createPlan();
-      cache.get.mockResolvedValue(makeCachedPlan(plan));
+      cacheGetMock.mockResolvedValue(makeCachedPlan(plan));
 
       const result = await repository.findById(new PlanId(PLAN_UUID));
 
       expect(result?.planId.value).toBe(plan.planId.value);
       expect(result?.features).toEqual(plan.features);
-      expect(planRepository.findById).not.toHaveBeenCalled();
+      expect(findByIdMock).not.toHaveBeenCalled();
     });
 
     it('should read from database and populate cache on miss', async () => {
       const plan = createPlan();
       planRepository.findById.mockResolvedValue(plan);
-      cache.get.mockResolvedValue(null);
+      cacheGetMock.mockResolvedValue(null);
 
       const result = await repository.findById(new PlanId(PLAN_UUID));
 
       expect(result).toBe(plan);
-      expect(planRepository.findById).toHaveBeenCalledWith(
+      expect(findByIdMock).toHaveBeenCalledWith(
         expect.objectContaining({ value: PLAN_UUID }),
       );
-      expect(cache.set).toHaveBeenCalledWith(
+      expect(cacheSetMock).toHaveBeenCalledWith(
         `payment:plans:by-id:${PLAN_UUID}`,
         expect.objectContaining({
           id: plan.planId.value,
@@ -92,25 +107,25 @@ describe('CachedPlanRepository', () => {
   describe('findAllActive()', () => {
     it('should return cached plans and skip database on hit', async () => {
       const plan = createPlan('Cached');
-      cache.get.mockResolvedValue([makeCachedPlan(plan)]);
+      cacheGetMock.mockResolvedValue([makeCachedPlan(plan)]);
 
       const result = await repository.findAllActive(0, 100);
 
       expect(result).toHaveLength(1);
       expect(result[0].planId.value).toBe(plan.planId.value);
-      expect(planRepository.findAllActive).not.toHaveBeenCalled();
+      expect(findAllActiveMock).not.toHaveBeenCalled();
     });
 
     it('should read from database and cache the result on miss', async () => {
       const plan = createPlan('DB Plan');
       planRepository.findAllActive.mockResolvedValue([plan]);
-      cache.get.mockResolvedValue(null);
+      cacheGetMock.mockResolvedValue(null);
 
       const result = await repository.findAllActive(0, 100);
 
       expect(result).toEqual([plan]);
-      expect(planRepository.findAllActive).toHaveBeenCalledWith(0, 100);
-      expect(cache.set).toHaveBeenCalledWith(
+      expect(findAllActiveMock).toHaveBeenCalledWith(0, 100);
+      expect(cacheSetMock).toHaveBeenCalledWith(
         'payment:plans:active:0:100',
         [expect.objectContaining({ id: plan.planId.value })],
         3600,
@@ -124,8 +139,8 @@ describe('CachedPlanRepository', () => {
 
       await repository.save(plan);
 
-      expect(planRepository.save).toHaveBeenCalledWith(plan);
-      expect(cache.delByPattern).toHaveBeenCalledWith('payment:plans:*');
+      expect(saveMock).toHaveBeenCalledWith(plan);
+      expect(cacheDelByPatternMock).toHaveBeenCalledWith('payment:plans:*');
     });
   });
 });
