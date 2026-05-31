@@ -1,14 +1,14 @@
-import { Inject } from '@nestjs/common';
-import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
-import { QueryHandler } from '@nestjs/cqrs';
 import { BaseQueryHandler } from '@20206205tech/nestjs-common';
+import { Inject } from '@nestjs/common';
+import { QueryHandler } from '@nestjs/cqrs';
+import { PlanNotFoundException } from '../../domain/exceptions/plan-not-found.exception';
 import { PlanId } from '../../domain/value-objects/plan-id';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
 } from '../ports/database/plan.repository.port';
-import { GetDetailPlanQuery } from './get-detail-plan.query';
 import { type PlanResponseItem } from './get-all-plan.query-handler';
+import { GetDetailPlanQuery } from './get-detail-plan.query';
 
 @QueryHandler(GetDetailPlanQuery)
 export class GetDetailPlanQueryHandler extends BaseQueryHandler<GetDetailPlanQuery> {
@@ -28,6 +28,7 @@ export class GetDetailPlanQueryHandler extends BaseQueryHandler<GetDetailPlanQue
       name: plan.name.value,
       durationMonths: plan.durationMonths.value,
       price: plan.price.amount,
+      features: plan.features,
       isActive: plan.isActive,
       createdAt: plan.createdAt,
     };

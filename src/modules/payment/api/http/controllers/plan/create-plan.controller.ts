@@ -3,6 +3,7 @@ import { BaseController } from '@20206205tech/nestjs-common';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreatePlanCommand } from '../../../../application/commands/create-plan.command';
+import { DEFAULT_PLAN_FEATURES } from '../../../../domain/value-objects/constants';
 import { CreatePlanRequestDto } from '../../dto/request/create-plan-request.dto';
 import { CreatePlanResponseDto } from '../../dto/response/create-plan-response.dto';
 
@@ -20,6 +21,7 @@ export class CreatePlanController extends BaseController {
         dto.durationMonths,
         dto.price,
         dto.isActive ?? true,
+        dto.features ?? DEFAULT_PLAN_FEATURES,
       ),
     );
     // Sử dụng interface thay vì class trực tiếp để tránh lỗi resolution với strict linting
@@ -28,6 +30,7 @@ export class CreatePlanController extends BaseController {
       name: { value: string };
       durationMonths: { value: number };
       price: { amount: number };
+      features: string[];
     };
 
     return new CreatePlanResponseDto({
@@ -37,6 +40,7 @@ export class CreatePlanController extends BaseController {
         name: result.name.value,
         durationMonths: result.durationMonths.value,
         price: result.price.amount,
+        features: result.features,
       },
     });
   }

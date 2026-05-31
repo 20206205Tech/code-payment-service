@@ -1,11 +1,11 @@
+import { BaseCommandHandler } from '@20206205tech/nestjs-common';
 import { Inject } from '@nestjs/common';
 import { CommandHandler } from '@nestjs/cqrs';
-import { BaseCommandHandler } from '@20206205tech/nestjs-common';
 import { Plan } from '../../domain/entities/plan';
+import { PlanFactory } from '../../domain/factories/plan.factory';
 import { Money } from '../../domain/value-objects/money';
 import { PlanDurationMonths } from '../../domain/value-objects/plan-duration-months';
 import { PlanName } from '../../domain/value-objects/plan-name';
-import { PlanFactory } from '../../domain/factories/plan.factory';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -30,6 +30,7 @@ export class CreatePlanCommandHandler extends BaseCommandHandler<
       new PlanDurationMonths(command.durationMonths),
       new Money(command.price),
       command.isActive,
+      command.features,
     );
 
     await this.planRepository.save(plan);

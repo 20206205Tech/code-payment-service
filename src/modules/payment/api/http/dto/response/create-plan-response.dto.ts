@@ -5,6 +5,7 @@ export interface DataCreatePlanResponseDto {
   name: string;
   durationMonths: number;
   price: number;
+  features: string[];
 }
 
 export class CreatePlanResponseDto extends BaseResponseDto<DataCreatePlanResponseDto> {}

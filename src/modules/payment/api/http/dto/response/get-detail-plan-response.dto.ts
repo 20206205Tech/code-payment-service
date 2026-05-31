@@ -5,6 +5,7 @@ export interface DataGetDetailPlanResponseDto {
   name: string;
   durationMonths: number;
   price: number;
+  features: string[];
   isActive: boolean;
   createdAt: Date;
 }

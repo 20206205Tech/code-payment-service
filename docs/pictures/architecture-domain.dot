@@ -4,6 +4,7 @@ strict digraph "dependency-cruiser output"{
     edge [arrowhead="normal" arrowsize="0.6" penwidth="2.0" color="#00000033" fontname="Helvetica" fontsize="9"]
 
     subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" subgraph "cluster_src/modules/payment/domain" {label="domain" subgraph "cluster_src/modules/payment/domain/entities" {label="entities" "src/modules/payment/domain/entities/plan.ts" [label=<plan.ts> tooltip="plan.ts" URL="src/modules/payment/domain/entities/plan.ts" fillcolor="#c8e6c9" style="filled" shape="box"] } } } } }
+    "src/modules/payment/domain/entities/plan.ts" -> "src/modules/payment/domain/value-objects/constants.ts"
     "src/modules/payment/domain/entities/plan.ts" -> "src/modules/payment/domain/value-objects/money.ts"
     "src/modules/payment/domain/entities/plan.ts" -> "src/modules/payment/domain/value-objects/plan-duration-months.ts"
     "src/modules/payment/domain/entities/plan.ts" -> "src/modules/payment/domain/value-objects/plan-id.ts"
@@ -32,6 +33,7 @@ strict digraph "dependency-cruiser output"{
     subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" subgraph "cluster_src/modules/payment/domain" {label="domain" subgraph "cluster_src/modules/payment/domain/exceptions" {label="exceptions" "src/modules/payment/domain/exceptions/transaction-not-found.exception.ts" [label=<transaction-not-found.exception.ts> tooltip="transaction-not-found.exception.ts" URL="src/modules/payment/domain/exceptions/transaction-not-found.exception.ts" fillcolor="#ff5252" style="filled" shape="box" fontcolor="white"] } } } } }
     subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/payment" {label="payment" subgraph "cluster_src/modules/payment/domain" {label="domain" subgraph "cluster_src/modules/payment/domain/factories" {label="factories" "src/modules/payment/domain/factories/plan.factory.ts" [label=<plan.factory.ts> tooltip="plan.factory.ts" URL="src/modules/payment/domain/factories/plan.factory.ts" fillcolor="#a7ffeb" style="filled" shape="box"] } } } } }
     "src/modules/payment/domain/factories/plan.factory.ts" -> "src/modules/payment/domain/entities/plan.ts"
+    "src/modules/payment/domain/factories/plan.factory.ts" -> "src/modules/payment/domain/value-objects/constants.ts"
     "src/modules/payment/domain/factories/plan.factory.ts" -> "src/modules/payment/domain/value-objects/money.ts"
     "src/modules/payment/domain/factories/plan.factory.ts" -> "src/modules/payment/domain/value-objects/plan-duration-months.ts"
     "src/modules/payment/domain/factories/plan.factory.ts" -> "src/modules/payment/domain/value-objects/plan-name.ts"

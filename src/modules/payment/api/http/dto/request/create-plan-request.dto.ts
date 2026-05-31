@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsInt,
   IsNotEmpty,
@@ -29,4 +30,14 @@ export class CreatePlanRequestDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @ApiProperty({
+    required: false,
+    type: [String],
+    example: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  features?: string[];
 }

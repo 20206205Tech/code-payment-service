@@ -1,6 +1,6 @@
+import { BaseQueryHandler } from '@20206205tech/nestjs-common';
 import { Inject } from '@nestjs/common';
 import { QueryHandler } from '@nestjs/cqrs';
-import { BaseQueryHandler } from '@20206205tech/nestjs-common';
 import {
   PLAN_REPOSITORY_PORT,
   type PlanRepositoryPort,
@@ -12,6 +12,7 @@ export interface PlanResponseItem {
   name: string;
   durationMonths: number;
   price: number;
+  features: string[];
   isActive: boolean;
   createdAt: Date;
 }
@@ -35,6 +36,7 @@ export class GetAllPlanQueryHandler extends BaseQueryHandler<GetAllPlanQuery> {
       name: p.name.value,
       durationMonths: p.durationMonths.value,
       price: p.price.amount,
+      features: p.features,
       isActive: p.isActive,
       createdAt: p.createdAt,
     }));
