@@ -1,20 +1,48 @@
 import { INestApplication } from '@nestjs/common';
+import Redis from 'ioredis';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import {
-  mainWithMockAuth,
   adminHeader,
+  mainWithMockAuth,
   userHeader,
 } from '../common/utils/main-with-mock-auth.util';
 
+const ALL_PLANS_CACHE_KEY = 'payment:plans:active:0:100';
+
+async function captureRedisCommands<T>(
+  redis: Redis,
+  action: () => Promise<T>,
+): Promise<{ result: T; commands: string[] }> {
+  const commands: string[] = [];
+  const monitor = await redis.monitor();
+  monitor.on('monitor', (_time, args) => {
+    commands.push(args.join(' ').toLowerCase());
+  });
+
+  try {
+    const result = await action();
+    return { result, commands };
+  } finally {
+    monitor.disconnect();
+  }
+}
+
 describe('CreatePlanController (e2e)', () => {
   let app: INestApplication;
+  let redis: Redis;
 
   beforeAll(async () => {
     app = await mainWithMockAuth(AppModule);
+    redis = new Redis(process.env.REDIS_URL as string);
+  });
+
+  beforeEach(async () => {
+    await redis.flushdb();
   });
 
   afterAll(async () => {
+    await redis.quit();
     await app.close();
   });
 
@@ -27,6 +55,22 @@ describe('CreatePlanController (e2e)', () => {
         isActive: true,
       };
 
+      expect(await redis.exists(ALL_PLANS_CACHE_KEY)).toBe(0);
+
+      const cachedListBeforeCreate = await captureRedisCommands(
+        redis,
+        async () =>
+          request(app.getHttpServer())
+            .get('/code-payment-service/plans')
+            .expect(200),
+      );
+      expect(cachedListBeforeCreate.commands).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(`set ${ALL_PLANS_CACHE_KEY}`),
+        ]),
+      );
+      expect(await redis.exists(ALL_PLANS_CACHE_KEY)).toBe(1);
+
       const response = await request(app.getHttpServer())
         .post('/code-payment-service/plans')
         .set(adminHeader())
@@ -36,6 +80,21 @@ describe('CreatePlanController (e2e)', () => {
       const body = response.body as { data: { name: string } };
       expect(body.data).toBeDefined();
       expect(body.data.name).toBe(payload.name);
+
+      expect(await redis.exists(ALL_PLANS_CACHE_KEY)).toBe(0);
+
+      const cachedListAfterCreate = await captureRedisCommands(
+        redis,
+        async () =>
+          request(app.getHttpServer())
+            .get('/code-payment-service/plans')
+            .expect(200),
+      );
+      expect(cachedListAfterCreate.commands).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(`set ${ALL_PLANS_CACHE_KEY}`),
+        ]),
+      );
     });
 
     it('should return 403 as regular user', async () => {
