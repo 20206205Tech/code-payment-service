@@ -73,12 +73,16 @@ export class Subscription extends BaseVersionAggregateRoot {
       throw new InvalidSubscriptionStatusException(this._status, 'activate');
     }
 
+    const wasFirstActivation = this._status === SubscriptionStatus.PENDING;
+
     this._status = SubscriptionStatus.ACTIVE;
     this._updatedAt = new Date();
 
-    // Nếu có durationMonths, cộng dồn thời gian từ baseDate
     if (durationMonths) {
-      this._periodStart = baseDate;
+      if (wasFirstActivation) {
+        this._periodStart = baseDate;
+      }
+
       const newEndDate = new Date(baseDate);
       newEndDate.setMonth(newEndDate.getMonth() + durationMonths.value);
       this._periodEnd = newEndDate;

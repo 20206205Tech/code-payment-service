@@ -4,7 +4,6 @@ import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard, RolesGuard, MfaGuard } from '@20206205tech/nestjs-auth';
 import { MockJwtAuthGuard, MockRolesGuard } from '../guards/mock-auth.guard';
 import { Test, TestingModule } from '@nestjs/testing';
-import { MESSAGE_BROKER_PORT } from '../../../src/modules/payment/application/ports/messaging/message-broker.port';
 import { EMAIL_SENDER_PORT } from '../../../src/modules/payment/application/ports/email/email-sender.port';
 import { USER_PROFILE_PORT } from '../../../src/modules/payment/application/ports/service/user-profile.port';
 import { PaymentTimeoutProcessor } from '../../../src/modules/payment/application/processors/payment-timeout.processor';
@@ -19,10 +18,6 @@ export async function mainWithMockAuth(module: any): Promise<INestApplication> {
     .useValue(new MockRolesGuard(new Reflector()))
     .overrideGuard(MfaGuard)
     .useValue({ canActivate: () => true })
-    .overrideProvider(MESSAGE_BROKER_PORT)
-    .useValue({
-      publishSubscriptionPurchased: jest.fn().mockResolvedValue(undefined),
-    })
     .overrideProvider(EMAIL_SENDER_PORT)
     .useValue({
       sendPaymentSuccessEmail: jest.fn().mockResolvedValue(undefined),

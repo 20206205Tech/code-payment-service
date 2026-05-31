@@ -1,4 +1,5 @@
 import { UserId } from '@20206205tech/nestjs-common';
+import { addMonths } from 'date-fns';
 import { Plan } from '../entities/plan';
 import { Subscription } from '../entities/subscription';
 import { Transaction } from '../entities/transaction';
@@ -131,10 +132,7 @@ describe('PaymentDomainService', () => {
       const periodEnd = result.subscription.periodEnd;
 
       // Kiểm tra periodEnd = periodStart + plan.durationMonths
-      const expectedEndDate = new Date(periodStart);
-      expectedEndDate.setMonth(
-        expectedEndDate.getMonth() + plan.durationMonths.value,
-      );
+      const expectedEndDate = addMonths(periodStart, plan.durationMonths.value);
 
       expect(periodEnd.getTime()).toBeGreaterThanOrEqual(
         expectedEndDate.getTime() - 1000,

@@ -24,19 +24,26 @@ export class KafkaMessageBrokerAdapter
       : 'prod-payment-events';
 
   constructor(private readonly configService: ConfigService) {
+    const ca = this.configService.get<string>('KAFKA_SSL_CA');
+    const cert = this.configService.get<string>('KAFKA_SSL_CERT');
+    const key = this.configService.get<string>('KAFKA_SSL_KEY');
+    const useSsl = Boolean(ca && cert && key);
+
     const kafka = new Kafka({
       clientId: 'payment-service',
       brokers: [this.configService.getOrThrow<string>('KAFKA_BROKER')],
-      ssl: {
-        ca: [this.configService.getOrThrow<string>('KAFKA_SSL_CA')],
-        cert: this.configService.getOrThrow<string>('KAFKA_SSL_CERT'),
-        key: this.configService.getOrThrow<string>('KAFKA_SSL_KEY'),
-        rejectUnauthorized: true,
-      },
+      ...(useSsl && {
+        ssl: {
+          ca: [ca!],
+          cert: cert!,
+          key: key!,
+          rejectUnauthorized: true,
+        },
+      }),
     });
 
     this.producer = kafka.producer({
-      allowAutoTopicCreation: false,
+      allowAutoTopicCreation: true,
       createPartitioner: Partitioners.DefaultPartitioner,
     });
   }
