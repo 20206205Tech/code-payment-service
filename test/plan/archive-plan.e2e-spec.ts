@@ -13,8 +13,6 @@ describe('ArchivePlanController (e2e)', () => {
 
   beforeAll(async () => {
     app = await mainWithMockAuth(AppModule);
-
-    // Create a plan to archive
     const res = await request(httpServer(app))
       .post('/code-payment-service/plans')
       .set(adminHeader())

@@ -14,8 +14,6 @@ describe('PurchaseSubscriptionController (e2e)', () => {
 
   beforeAll(async () => {
     app = await mainWithMockAuth(AppModule);
-
-    // Create a plan to purchase
     const res = await request(httpServer(app))
       .post('/code-payment-service/plans')
       .set(adminHeader())
@@ -38,7 +36,6 @@ describe('PurchaseSubscriptionController (e2e)', () => {
           plan_id: planId,
         });
 
-      // Status could be 201 or 200 depending on implementation
       expect([200, 201]).toContain(response.status);
       const body = response.body as { data: { payment_url: string } };
       expect(body.data.payment_url).toBeDefined();
