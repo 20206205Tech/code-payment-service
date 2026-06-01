@@ -19,6 +19,8 @@ describe('OutboxRelayCron', () => {
     orWhere: jest.Mock;
     orderBy: jest.Mock;
     take: jest.Mock;
+    setLock: jest.Mock;
+    setOnLocked: jest.Mock;
     getMany: jest.Mock;
   };
 
@@ -28,12 +30,24 @@ describe('OutboxRelayCron', () => {
       orWhere: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
+      setLock: jest.fn().mockReturnThis(),
+      setOnLocked: jest.fn().mockReturnThis(),
       getMany: jest.fn(),
     };
 
-    outboxRepo = {
+    const mockManager = {
       createQueryBuilder: jest.fn(() => queryBuilder),
-      save: jest.fn(),
+      save: jest.fn().mockResolvedValue(undefined),
+      transaction: jest
+        .fn()
+        .mockImplementation(
+          (cb: (manager: typeof mockManager) => Promise<void>) =>
+            cb(mockManager),
+        ),
+    };
+
+    outboxRepo = {
+      manager: mockManager,
     } as unknown as jest.Mocked<Repository<OutboxEntity>>;
     messageBroker = {
       publishSubscriptionPurchased: jest.fn(),
@@ -74,14 +88,17 @@ describe('OutboxRelayCron', () => {
 
     queryBuilder.getMany.mockResolvedValue([mockMsg]);
     messageBroker.publishSubscriptionPurchased.mockResolvedValue(undefined);
-    outboxRepo.save.mockResolvedValue(undefined);
+    (outboxRepo.manager.save as jest.Mock).mockResolvedValue(undefined);
 
     await cron.processOutboxMessages();
 
-    expect(outboxRepo.createQueryBuilder).toHaveBeenCalledWith('outbox');
+    expect(outboxRepo.manager.createQueryBuilder).toHaveBeenCalledWith(
+      OutboxEntity,
+      'outbox',
+    );
     expect(messageBroker.publishSubscriptionPurchased).toHaveBeenCalled();
     expect(mockMsg.status).toBe('DONE');
-    expect(outboxRepo.save).toHaveBeenCalledWith(mockMsg);
+    expect(outboxRepo.manager.save).toHaveBeenCalledWith(mockMsg);
   });
 
   it('should mark message as FAILED if broker publishing fails', async () => {
@@ -102,12 +119,12 @@ describe('OutboxRelayCron', () => {
     messageBroker.publishSubscriptionPurchased.mockRejectedValue(
       new Error('Kafka Down'),
     );
-    outboxRepo.save.mockResolvedValue(undefined);
+    (outboxRepo.manager.save as jest.Mock).mockResolvedValue(undefined);
 
     await cron.processOutboxMessages();
 
     expect(mockMsg.status).toBe('FAILED');
-    expect(outboxRepo.save).toHaveBeenCalledWith(mockMsg);
+    expect(outboxRepo.manager.save).toHaveBeenCalledWith(mockMsg);
   });
 
   it('should handle unknown event types gracefully', async () => {

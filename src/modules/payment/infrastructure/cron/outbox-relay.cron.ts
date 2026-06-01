@@ -69,24 +69,26 @@ export class OutboxRelayCron {
       : CronExpression.EVERY_5_MINUTES,
   )
   async processOutboxMessages() {
-    const pendingMessages = await this.loadPendingMessages();
-    if (pendingMessages.length === 0) return;
+    await this.outboxRepo.manager.transaction(async (manager) => {
+      const pendingMessages = await this.loadPendingMessages(manager);
+      if (pendingMessages.length === 0) return;
 
-    this.logger.debug(
-      `📤 Outbox: Tìm thấy ${pendingMessages.length} tin nhắn đang chờ gửi.`,
-    );
+      this.logger.debug(
+        `📤 Outbox: Tìm thấy ${pendingMessages.length} tin nhắn đang chờ gửi.`,
+      );
 
-    for (const msg of pendingMessages) {
-      await this.processOutboxMessage(msg);
-    }
+      for (const msg of pendingMessages) {
+        await this.processOutboxMessage(msg, manager);
+      }
+    });
   }
 
-  private async loadPendingMessages() {
+  private async loadPendingMessages(manager: import('typeorm').EntityManager) {
     const maxRetry = 10;
     const retryDelayMinutes = 5;
 
-    return this.outboxRepo
-      .createQueryBuilder('outbox')
+    return manager
+      .createQueryBuilder(OutboxEntity, 'outbox')
       .where('outbox.status = :pending', { pending: 'PENDING' })
       .orWhere(
         'outbox.status = :failed AND outbox.retryCount < :maxRetry AND outbox.processedAt < :retryAfter',
@@ -98,15 +100,20 @@ export class OutboxRelayCron {
       )
       .orderBy('outbox.createdAt', 'ASC')
       .take(50)
+      .setLock('pessimistic_write')
+      .setOnLocked('skip_locked')
       .getMany();
   }
 
-  private async processOutboxMessage(msg: OutboxEntity): Promise<void> {
+  private async processOutboxMessage(
+    msg: OutboxEntity,
+    manager: import('typeorm').EntityManager,
+  ): Promise<void> {
     try {
       await this.publishOutboxMessage(msg);
-      await this.markMessageDone(msg);
+      await this.markMessageDone(msg, manager);
     } catch (error) {
-      await this.handleOutboxMessageFailure(msg, error);
+      await this.handleOutboxMessageFailure(msg, error, manager);
     }
   }
 
@@ -140,15 +147,19 @@ export class OutboxRelayCron {
     });
   }
 
-  private async markMessageDone(msg: OutboxEntity): Promise<void> {
+  private async markMessageDone(
+    msg: OutboxEntity,
+    manager: import('typeorm').EntityManager,
+  ): Promise<void> {
     msg.status = 'DONE';
     msg.processedAt = new Date();
-    await this.outboxRepo.save(msg);
+    await manager.save(msg);
   }
 
   private async handleOutboxMessageFailure(
     msg: OutboxEntity,
     error: unknown,
+    manager: import('typeorm').EntityManager,
   ): Promise<void> {
     const maxRetry = 10;
 
@@ -172,7 +183,7 @@ export class OutboxRelayCron {
       msg.status = 'FAILED'; // Sẽ được retry sau
     }
 
-    await this.outboxRepo.save(msg);
+    await manager.save(msg);
   }
 
   private async sendDeadLetterAlert(
