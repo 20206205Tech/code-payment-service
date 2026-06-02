@@ -22,7 +22,12 @@ export class TransactionCleanupCron {
     private readonly subscriptionRepository: SubscriptionRepositoryPort,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(
+    process.env.NODE_ENV === 'production'
+      ? CronExpression.EVERY_10_MINUTES
+      : CronExpression.EVERY_5_MINUTES,
+    // : CronExpression.EVERY_5_SECONDS,
+  )
   async handleStaleTransactions(): Promise<void> {
     this.logger.log('Bắt đầu quét các giao dịch PENDING quá hạn...');
 

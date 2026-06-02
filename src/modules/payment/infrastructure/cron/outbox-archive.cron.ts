@@ -23,6 +23,7 @@ export class OutboxArchiveCron {
     process.env.NODE_ENV === 'production'
       ? CronExpression.EVERY_DAY_AT_MIDNIGHT
       : CronExpression.EVERY_5_MINUTES,
+    // : CronExpression.EVERY_5_SECONDS,
   )
   async handleArchiveOutbox(): Promise<void> {
     this.logger.log('Bắt đầu quá trình archive outbox messages...');

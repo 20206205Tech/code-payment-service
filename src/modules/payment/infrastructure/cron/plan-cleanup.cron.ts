@@ -24,6 +24,7 @@ export class PlanCleanupCron {
     process.env.NODE_ENV === 'production'
       ? CronExpression.EVERY_DAY_AT_MIDNIGHT
       : CronExpression.EVERY_5_MINUTES,
+    // : CronExpression.EVERY_5_SECONDS,
   )
   async handleCleanup(): Promise<void> {
     this.logger.log(
