@@ -20,8 +20,11 @@ export class PlanCleanupCron {
     private readonly planRepo: Repository<PlanEntity>,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  // @Cron(CronExpression.EVERY_5_SECONDS) // dùng để test nhanh
+  @Cron(
+    process.env.NODE_ENV === 'production'
+      ? CronExpression.EVERY_DAY_AT_MIDNIGHT
+      : CronExpression.EVERY_5_MINUTES,
+  )
   async handleCleanup(): Promise<void> {
     this.logger.log(
       'Bắt đầu dọn dẹp các Plan đã archive (isActive = false)...',

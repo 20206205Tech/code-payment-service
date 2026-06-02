@@ -14,10 +14,12 @@ import { PAYMENT_GATEWAY_PORT } from '../application/ports/payment/payment-gatew
 import { USER_PROFILE_PORT } from '../application/ports/service/user-profile.port';
 import { PAYMENT_QUEUE } from '../domain/value-objects/constants';
 import { RedisCacheAdapter } from './cache/redis-cache.adapter';
+import { OutboxArchiveCron } from './cron/outbox-archive.cron';
 import { OutboxRelayCron } from './cron/outbox-relay.cron';
 import { PlanCleanupCron } from './cron/plan-cleanup.cron';
 import { SubscriptionExpirationCron } from './cron/subscription-expiration.cron';
 import { TransactionCleanupCron } from './cron/transaction-cleanup.cron';
+import { OutboxArchiveEntity } from './database/entities/outbox-archive.entity';
 import { OutboxEntity } from './database/entities/outbox.entity';
 import { PlanEntity } from './database/entities/plan.entity';
 import { SubscriptionEntity } from './database/entities/subscription.entity';
@@ -37,6 +39,7 @@ import { PaymentGatewaySelectorService } from './payment/payment-gateway-selecto
 import { SupabaseUserProfileService } from './services/supabase-user-profile.service';
 
 const cronProviders: Provider[] = [
+  OutboxArchiveCron,
   PlanCleanupCron,
   OutboxRelayCron,
   SubscriptionExpirationCron,
@@ -98,6 +101,7 @@ export const PaymentInfrastructure = {
       SubscriptionEntity,
       TransactionEntity,
       OutboxEntity,
+      OutboxArchiveEntity,
     ]),
     ...PaymentGatewayInfrastructure.imports,
   ],
