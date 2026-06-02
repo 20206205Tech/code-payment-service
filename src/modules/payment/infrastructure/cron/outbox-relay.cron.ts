@@ -67,6 +67,7 @@ export class OutboxRelayCron {
     process.env.NODE_ENV === 'production'
       ? CronExpression.EVERY_5_SECONDS
       : CronExpression.EVERY_5_MINUTES,
+    // : CronExpression.EVERY_5_SECONDS,
   )
   async processOutboxMessages() {
     await this.outboxRepo.manager.transaction(async (manager) => {

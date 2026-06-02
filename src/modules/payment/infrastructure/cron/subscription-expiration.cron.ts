@@ -40,7 +40,13 @@ export class SubscriptionExpirationCron {
   /**
    * Chạy mỗi ngày lúc nửa đêm để kiểm tra và xử lý các subscription hết hạn.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+
+  @Cron(
+    process.env.NODE_ENV === 'production'
+      ? CronExpression.EVERY_DAY_AT_MIDNIGHT
+      : CronExpression.EVERY_5_MINUTES,
+    // : CronExpression.EVERY_5_SECONDS,
+  )
   async handleSubscriptionExpiration(): Promise<void> {
     this.logger.log(
       'Bắt đầu quy trình xử lý subscription hết hạn và thông báo...',
