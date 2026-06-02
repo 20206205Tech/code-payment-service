@@ -1,15 +1,15 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
-  TRANSACTION_REPOSITORY_PORT,
-  type TransactionRepositoryPort,
-} from '../../application/ports/database/transaction.repository.port';
-import {
   SUBSCRIPTION_REPOSITORY_PORT,
   type SubscriptionRepositoryPort,
 } from '../../application/ports/database/subscription.repository.port';
-import { SubscriptionStatus } from '../../domain/value-objects/subscription-status';
+import {
+  TRANSACTION_REPOSITORY_PORT,
+  type TransactionRepositoryPort,
+} from '../../application/ports/database/transaction.repository.port';
 import { PAYMENT_TIMEOUT_MS } from '../../domain/value-objects/constants';
+import { SubscriptionStatus } from '../../domain/value-objects/subscription-status';
 
 @Injectable()
 export class TransactionCleanupCron {
@@ -23,7 +23,7 @@ export class TransactionCleanupCron {
   ) {}
 
   @Cron(
-    process.env.NODE_ENV === 'production'
+    process.env.ENVIRONMENT === 'production'
       ? CronExpression.EVERY_10_MINUTES
       : CronExpression.EVERY_5_MINUTES,
     // : CronExpression.EVERY_5_SECONDS,

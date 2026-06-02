@@ -64,9 +64,9 @@ export class OutboxRelayCron {
   ) {}
 
   @Cron(
-    process.env.NODE_ENV === 'production'
+    process.env.ENVIRONMENT === 'production'
       ? CronExpression.EVERY_5_SECONDS
-      : CronExpression.EVERY_5_MINUTES,
+      : CronExpression.EVERY_SECOND,
     // : CronExpression.EVERY_5_SECONDS,
   )
   async processOutboxMessages() {
