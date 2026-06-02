@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, LessThan } from 'typeorm';
-import { OutboxEntity } from '../database/entities/outbox.entity';
 import { OutboxArchiveEntity } from '../database/entities/outbox-archive.entity';
+import { OutboxEntity } from '../database/entities/outbox.entity';
 
 @Injectable()
 export class OutboxArchiveCron {
@@ -20,7 +20,7 @@ export class OutboxArchiveCron {
   ) {}
 
   @Cron(
-    process.env.NODE_ENV === 'production'
+    process.env.ENVIRONMENT === 'production'
       ? CronExpression.EVERY_DAY_AT_MIDNIGHT
       : CronExpression.EVERY_5_MINUTES,
     // : CronExpression.EVERY_5_SECONDS,
