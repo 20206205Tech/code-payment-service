@@ -46,7 +46,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.76.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.218.0",
     "@opentelemetry/sdk-node": "^0.218.0",
-    "axios": "^1.15.0",
+    "axios": "^1.17.0",
     "bullmq": "^5.77.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
