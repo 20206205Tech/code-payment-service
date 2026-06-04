@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@20206205tech/nestjs-auth": "^1.1.0",
-    "@20206205tech/nestjs-common": "^0.11.2",
+    "@20206205tech/nestjs-common": "^0.11.3",
     "@getbrevo/brevo": "^5.0.4",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.4",
