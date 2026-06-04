@@ -72,7 +72,7 @@
     "@testcontainers/kafka": "^12.0.1",
     "@testcontainers/postgresql": "^12.0.1",
     "@testcontainers/redis": "^12.0.0",
-    "@types/cron": "^2.0.1",
+    "@types/cron": "^2.4.3",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.1",
