@@ -84,7 +84,7 @@ describe('PlanOrmRepository', () => {
         where: { isActive: true },
         skip: 5,
         take: 10,
-        order: { createdAt: 'DESC' },
+        order: { price: 'ASC' },
       });
     });
   });
