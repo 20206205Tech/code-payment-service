@@ -24,7 +24,7 @@ export class PlanOrmRepository implements PlanRepositoryPort {
       where: { isActive: true },
       skip,
       take: limit,
-      order: { createdAt: 'DESC' },
+      order: { price: 'ASC' },
     });
     return orms.map((orm) => PlanMapper.toDomain(orm));
   }
