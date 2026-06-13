@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import { UserId } from '@20206205tech/nestjs-common';
-import { EventPublisher } from '@nestjs/cqrs';
+import { EventBus } from '@nestjs/cqrs';
 import { DataSource } from 'typeorm';
 import { PlanRepositoryPort } from '../../application/ports/database/plan.repository.port';
 import { SubscriptionRepositoryPort } from '../../application/ports/database/subscription.repository.port';
@@ -73,9 +73,9 @@ const mockSubscriptionRepo = {
   save: jest.fn(),
   delete: jest.fn(),
 } as unknown as jest.Mocked<SubscriptionRepositoryPort>;
-const mockPublisher = {
-  mergeObjectContext: jest.fn((e: any) => e),
-} as unknown as jest.Mocked<EventPublisher>;
+const mockEventBus = {
+  publishAll: jest.fn(),
+} as unknown as jest.Mocked<EventBus>;
 const mockPlanRepo = {
   findById: jest.fn(),
 } as unknown as jest.Mocked<PlanRepositoryPort>;
@@ -94,7 +94,7 @@ describe('ManualActivateTransactionCommandHandler', () => {
       mockSubscriptionRepo,
       mockPlanRepo,
       mockDataSource,
-      mockPublisher,
+      mockEventBus,
       paymentDomainService,
     );
   });

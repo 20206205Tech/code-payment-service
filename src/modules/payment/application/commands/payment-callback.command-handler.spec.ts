@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
-import { EventPublisher } from '@nestjs/cqrs';
+import { EventBus } from '@nestjs/cqrs';
 import { DataSource } from 'typeorm';
 import { PlanRepositoryPort } from '../../application/ports/database/plan.repository.port';
 import { SubscriptionRepositoryPort } from '../../application/ports/database/subscription.repository.port';
@@ -89,9 +89,9 @@ const mockPaymentGateway = {
   getGateway: jest.fn(),
 } as unknown as jest.Mocked<PaymentGatewayPort>;
 
-const mockPublisher = {
-  mergeObjectContext: jest.fn((entity: any) => entity),
-} as unknown as jest.Mocked<EventPublisher>;
+const mockEventBus = {
+  publishAll: jest.fn(),
+} as unknown as jest.Mocked<EventBus>;
 const mockDataSource = {
   transaction: jest.fn((cb: any) => cb()),
 } as unknown as DataSource;
@@ -108,7 +108,7 @@ describe('PaymentCallbackCommandHandler', () => {
       mockPlanRepo,
       mockPaymentGateway,
       mockDataSource,
-      mockPublisher,
+      mockEventBus,
       paymentDomainService,
     );
   });
