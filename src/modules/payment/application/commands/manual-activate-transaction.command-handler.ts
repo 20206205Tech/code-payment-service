@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, EventPublisher } from '@nestjs/cqrs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { BaseCommandHandler } from '@20206205tech/nestjs-common';
 
 import { DataSource } from 'typeorm';
@@ -36,7 +36,7 @@ export class ManualActivateTransactionCommandHandler extends BaseCommandHandler<
     @Inject(PLAN_REPOSITORY_PORT)
     private readonly planRepository: PlanRepositoryPort,
     private readonly dataSource: DataSource,
-    private readonly publisher: EventPublisher,
+    private readonly eventBus: EventBus,
     private readonly paymentDomainService: PaymentDomainService,
   ) {
     super();
@@ -90,12 +90,17 @@ export class ManualActivateTransactionCommandHandler extends BaseCommandHandler<
         baseDate,
       );
 
+      const events = subscription.getUncommittedEvents();
+
       await this.dataSource.transaction(async (manager) => {
         // Không gọi deactivateOtherSubscriptions nữa để cộng dồn
         await this.subscriptionRepository.save(subscription, manager);
         await this.transactionRepository.save(txn, manager);
       });
 
+      if (events.length > 0) {
+        this.eventBus.publishAll(events);
+      }
       subscription.commit();
     } else {
       // Still save transaction if no subscription

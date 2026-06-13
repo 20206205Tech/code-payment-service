@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, EventPublisher } from '@nestjs/cqrs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { BaseCommandHandler } from '@20206205tech/nestjs-common';
 
 import { DataSource } from 'typeorm';
@@ -40,7 +40,7 @@ export class PaymentCallbackCommandHandler extends BaseCommandHandler<
     @Inject(PAYMENT_GATEWAY_PORT)
     private readonly paymentGateway: PaymentGatewayPort,
     private readonly dataSource: DataSource,
-    private readonly publisher: EventPublisher,
+    private readonly eventBus: EventBus,
     private readonly paymentDomainService: PaymentDomainService,
   ) {
     super();
@@ -149,12 +149,17 @@ export class PaymentCallbackCommandHandler extends BaseCommandHandler<
         );
         txn.setPaidAt(new Date());
 
+        const events = subscription.getUncommittedEvents();
+
         await this.dataSource.transaction(async (manager) => {
           // Không gọi deactivateOtherSubscriptions nữa để cộng dồn
           await this.subscriptionRepository.save(subscription, manager);
           await this.transactionRepository.save(txn, manager);
         });
 
+        if (events.length > 0) {
+          this.eventBus.publishAll(events);
+        }
         subscription.commit();
 
         return { success: true, message: 'Thanh toán thành công' };
