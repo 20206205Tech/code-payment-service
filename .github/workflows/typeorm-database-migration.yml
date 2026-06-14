@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    # paths:
-    #   - 'src/database/migrations/**'
+    paths:
+      - 'src/database/migrations/**'
   pull_request:
     branches: [main]
     paths:
