@@ -23,6 +23,7 @@ async function bootstrap() {
   let DESCRIPTION = '';
   DESCRIPTION += `# Chào mừng đến với ${SERVICE_NAME} (${ENVIRONMENT})\n\n`;
 
+  // DESCRIPTION += `* **PAYMENT_DEFAULT_PROVIDER = ${PAYMENT_DEFAULT_PROVIDER}**\n\n`;
   DESCRIPTION += `* **PAYMENT_DEFAULT_PROVIDER = ${PAYMENT_DEFAULT_PROVIDER}**\n\n`;
 
   DESCRIPTION += `* [Đăng nhập Google](https://${SUPABASE_PROJECT_ID}.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://20206205tech.github.io/auth-callback)\n`;
