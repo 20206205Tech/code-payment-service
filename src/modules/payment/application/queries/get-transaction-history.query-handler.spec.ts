@@ -26,6 +26,7 @@ function makeTxn(): Transaction {
 
 const mockTransactionRepo = {
   findAllByUserId: jest.fn(),
+  countAllByUserId: jest.fn(),
   findById: jest.fn(),
   findByTxnRef: jest.fn(),
   findBySubscriptionId: jest.fn(),
@@ -44,20 +45,23 @@ describe('GetTransactionHistoryQueryHandler', () => {
 
   it('should return empty array when no transactions found', async () => {
     mockTransactionRepo.findAllByUserId.mockResolvedValue([]);
+    mockTransactionRepo.countAllByUserId.mockResolvedValue(0);
     const result = await handler.execute(
       new GetTransactionHistoryQuery(USER_UUID),
     );
-    expect(result).toEqual([]);
+    expect(result).toEqual({ items: [], total: 0 });
   });
 
   it('should map transactions to TransactionHistoryItem DTOs', async () => {
     mockTransactionRepo.findAllByUserId.mockResolvedValue([makeTxn()]);
+    mockTransactionRepo.countAllByUserId.mockResolvedValue(1);
     const result = await handler.execute(
       new GetTransactionHistoryQuery(USER_UUID, 0, 20),
     );
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.items[0]).toMatchObject({
       plan_id: PLAN_UUID,
       base_amount: 100000,
       discount_amount: 10000,
@@ -70,6 +74,7 @@ describe('GetTransactionHistoryQueryHandler', () => {
 
   it('should pass userId, skip, limit to repository', async () => {
     mockTransactionRepo.findAllByUserId.mockResolvedValue([]);
+    mockTransactionRepo.countAllByUserId.mockResolvedValue(0);
     await handler.execute(new GetTransactionHistoryQuery(USER_UUID, 10, 5));
 
     const args = mockTransactionRepo.findAllByUserId.mock.calls[0];
@@ -81,10 +86,11 @@ describe('GetTransactionHistoryQueryHandler', () => {
 
   it('should include id as UUID string', async () => {
     mockTransactionRepo.findAllByUserId.mockResolvedValue([makeTxn()]);
+    mockTransactionRepo.countAllByUserId.mockResolvedValue(1);
     const result = await handler.execute(
       new GetTransactionHistoryQuery(USER_UUID),
     );
-    expect(result[0].id).toMatch(
+    expect(result.items[0].id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
   });

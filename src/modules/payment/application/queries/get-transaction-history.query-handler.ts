@@ -23,7 +23,7 @@ export interface TransactionHistoryItem {
 @QueryHandler(GetTransactionHistoryQuery)
 export class GetTransactionHistoryQueryHandler extends BaseQueryHandler<
   GetTransactionHistoryQuery,
-  TransactionHistoryItem[]
+  { items: TransactionHistoryItem[]; total: number }
 > {
   constructor(
     @Inject(TRANSACTION_REPOSITORY_PORT)
@@ -34,14 +34,18 @@ export class GetTransactionHistoryQueryHandler extends BaseQueryHandler<
 
   async execute(
     query: GetTransactionHistoryQuery,
-  ): Promise<TransactionHistoryItem[]> {
+  ): Promise<{ items: TransactionHistoryItem[]; total: number }> {
     const userId = new UserId(query.userId);
-    const transactions = await this.transactionRepository.findAllByUserId(
-      userId,
-      query.skip,
-      query.limit,
-    );
-    return transactions.map((txn) => ({
+    const [transactions, total] = await Promise.all([
+      this.transactionRepository.findAllByUserId(
+        userId,
+        query.skip,
+        query.limit,
+      ),
+      this.transactionRepository.countAllByUserId(userId),
+    ]);
+
+    const items = transactions.map((txn) => ({
       id: txn.transactionId.value,
       plan_id: txn.planId.value,
       base_amount: txn.baseAmount.amount,
@@ -52,5 +56,7 @@ export class GetTransactionHistoryQueryHandler extends BaseQueryHandler<
       paid_at: txn.paidAt,
       created_at: txn.createdAt,
     }));
+
+    return { items, total };
   }
 }

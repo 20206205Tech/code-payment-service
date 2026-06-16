@@ -11,6 +11,8 @@ import { PaymentDomainService } from '../../domain/services/payment.domain-servi
 
 export interface MySubscriptionResponse {
   has_active_subscription: boolean;
+  period_start?: Date;
+  period_end?: Date;
 }
 
 @QueryHandler(GetMySubscriptionQuery)
@@ -38,6 +40,10 @@ export class GetMySubscriptionQueryHandler extends BaseQueryHandler<
     const hasActive =
       this.paymentDomainService.hasActiveSubscription(subscription);
 
-    return { has_active_subscription: hasActive };
+    return {
+      has_active_subscription: hasActive,
+      period_start: subscription ? subscription.periodStart : undefined,
+      period_end: subscription ? subscription.periodEnd : undefined,
+    };
   }
 }

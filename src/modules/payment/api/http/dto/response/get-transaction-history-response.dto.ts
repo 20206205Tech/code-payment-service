@@ -12,6 +12,9 @@ export interface TransactionHistoryItemDto {
   created_at: Date;
 }
 
-export type DataGetTransactionHistoryResponseDto = TransactionHistoryItemDto[];
+export interface DataGetTransactionHistoryResponseDto {
+  items: TransactionHistoryItemDto[];
+  total: number;
+}
 
 export class GetTransactionHistoryResponseDto extends BaseResponseDto<DataGetTransactionHistoryResponseDto> {}
