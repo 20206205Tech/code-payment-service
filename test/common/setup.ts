@@ -4,7 +4,6 @@ import {
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
 import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
-import { Wait } from 'testcontainers';
 import { VALID_TOKEN } from './constants/bearer-token.constant';
 
 jest.setTimeout(120000);
@@ -31,12 +30,9 @@ async function startRedisContainer(): Promise<StartedRedisContainer> {
 }
 
 async function startKafkaContainer(): Promise<StartedKafkaContainer> {
-  /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   return await new KafkaContainer('confluentinc/cp-kafka:7.3.3')
     .withExposedPorts(9093)
-    .waitingFor(Wait.forLogMessage(/.*\[KafkaServer id=\d+\] started.*/))
     .start();
-  /* eslint-enable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 }
 
 function seedSecrets(): void {
