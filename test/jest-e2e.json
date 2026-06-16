@@ -10,5 +10,6 @@
   "setupFilesAfterEnv": ["<rootDir>/common/setup.ts"],
   "testTimeout": 60000,
   "forceExit": true,
-  "detectOpenHandles": true
+  "detectOpenHandles": true,
+  "maxWorkers": 1
 }
