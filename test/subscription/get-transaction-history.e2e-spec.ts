@@ -25,9 +25,13 @@ describe('GetTransactionHistoryController (e2e)', () => {
         .set(userHeader())
         .expect(200);
 
-      const body = response.body as { success: boolean; data: any[] };
+      const body = response.body as {
+        success: boolean;
+        data: { items: any[]; total: number };
+      };
       expect(body.message).toBeDefined();
-      expect(Array.isArray(body.data)).toBe(true);
+      expect(Array.isArray(body.data.items)).toBe(true);
+      expect(typeof body.data.total).toBe('number');
     });
 
     it('should support pagination', async () => {
@@ -36,8 +40,8 @@ describe('GetTransactionHistoryController (e2e)', () => {
         .set(userHeader())
         .expect(200);
 
-      const body = response.body as { data: any[] };
-      expect(body.data.length).toBeLessThanOrEqual(5);
+      const body = response.body as { data: { items: any[]; total: number } };
+      expect(body.data.items.length).toBeLessThanOrEqual(5);
     });
   });
 });
