@@ -32,6 +32,11 @@ export class KafkaMessageBrokerAdapter
     const kafka = new Kafka({
       clientId: 'payment-service',
       brokers: [this.configService.getOrThrow<string>('KAFKA_BROKER')],
+      connectionTimeout: 10000,
+      retry: {
+        initialRetryTime: 300,
+        retries: 10,
+      },
       ...(useSsl && {
         ssl: {
           ca: [ca!],
