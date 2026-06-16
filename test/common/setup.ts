@@ -1,3 +1,4 @@
+import dns from 'dns';
 import { KafkaContainer, StartedKafkaContainer } from '@testcontainers/kafka';
 import {
   PostgreSqlContainer,
@@ -5,6 +6,8 @@ import {
 } from '@testcontainers/postgresql';
 import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { VALID_TOKEN } from './constants/bearer-token.constant';
+
+dns.setDefaultResultOrder('ipv4first');
 
 jest.setTimeout(120000);
 
