@@ -104,6 +104,8 @@ beforeAll(async () => {
     ]);
 
     seedSecrets();
+    // Đợi thêm 5 giây để các dịch vụ bên trong container (đặc biệt là Kafka/Zookeeper) ổn định
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   } catch (error) {
     console.error('Failed to setup test environment:', error);
     throw error;

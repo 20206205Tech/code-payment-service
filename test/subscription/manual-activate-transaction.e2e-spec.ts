@@ -117,9 +117,18 @@ describe('ManualActivateTransactionController (e2e)', () => {
     const kafka = new Kafka({
       clientId: 'e2e-test-consumer-payment',
       brokers: [process.env.KAFKA_BROKER!],
+      connectionTimeout: 10000,
+      retry: {
+        initialRetryTime: 300,
+        retries: 10,
+      },
     });
     const consumer = kafka.consumer({
       groupId: `e2e-payment-group-${randomUUID()}`,
+      retry: {
+        initialRetryTime: 300,
+        retries: 10,
+      },
     });
     await consumer.connect();
     await consumer.subscribe({ topic: TOPIC, fromBeginning: false });
