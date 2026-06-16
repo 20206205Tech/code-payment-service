@@ -50,6 +50,10 @@ export class KafkaMessageBrokerAdapter
     this.producer = kafka.producer({
       allowAutoTopicCreation: true,
       createPartitioner: Partitioners.DefaultPartitioner,
+      retry: {
+        initialRetryTime: 300,
+        retries: 10,
+      },
     });
   }
 
