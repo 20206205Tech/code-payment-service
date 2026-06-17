@@ -15,6 +15,7 @@ export interface TransactionRepositoryPort {
     skip?: number,
     limit?: number,
   ): Promise<Transaction[]>;
+  countAllByUserId(userId: UserId): Promise<number>;
   findPendingExpired(timeoutDate: Date): Promise<Transaction[]>;
   save(transaction: Transaction, context?: any): Promise<void>;
   delete(id: TransactionId): Promise<void>;

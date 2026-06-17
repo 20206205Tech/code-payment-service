@@ -1,3 +1,4 @@
+import dns from 'dns';
 import { KafkaContainer, StartedKafkaContainer } from '@testcontainers/kafka';
 import {
   PostgreSqlContainer,
@@ -5,6 +6,8 @@ import {
 } from '@testcontainers/postgresql';
 import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { VALID_TOKEN } from './constants/bearer-token.constant';
+
+dns.setDefaultResultOrder('ipv4first');
 
 jest.setTimeout(120000);
 
@@ -54,7 +57,11 @@ function seedSecrets(): void {
   process.env.REDIS_URL = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
 
   // Kafka container
-  process.env.KAFKA_BROKER = `${kafkaContainer.getHost()}:${kafkaContainer.getMappedPort(9093)}`;
+  const kafkaHost =
+    kafkaContainer.getHost() === 'localhost'
+      ? '127.0.0.1'
+      : kafkaContainer.getHost();
+  process.env.KAFKA_BROKER = `${kafkaHost}:${kafkaContainer.getMappedPort(9093)}`;
 
   // Payment Gateways (Dummy values)
   process.env.PAYMENT_VNPAY_TMN_CODE = 'TEST_TMN';
@@ -97,6 +104,8 @@ beforeAll(async () => {
     ]);
 
     seedSecrets();
+    // Đợi thêm 5 giây để các dịch vụ bên trong container (đặc biệt là Kafka/Zookeeper) ổn định
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   } catch (error) {
     console.error('Failed to setup test environment:', error);
     throw error;

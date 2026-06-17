@@ -19,9 +19,12 @@ export class GetTransactionHistoryController {
     @Query('limit') limit: number = 20,
   ): Promise<GetTransactionHistoryResponseDto> {
     const intermediate: unknown = await this.queryBus.execute(
-      new GetTransactionHistoryQuery(userId, skip, limit),
+      new GetTransactionHistoryQuery(userId, Number(skip), Number(limit)),
     );
-    const data = intermediate as TransactionHistoryItem[];
+    const data = intermediate as {
+      items: TransactionHistoryItem[];
+      total: number;
+    };
     return new GetTransactionHistoryResponseDto({
       message: 'Lấy lịch sử giao dịch thành công',
       data,

@@ -50,6 +50,12 @@ export class TransactionOrmRepository implements TransactionRepositoryPort {
     return orms.map((orm) => TransactionMapper.toDomain(orm));
   }
 
+  async countAllByUserId(userId: UserId): Promise<number> {
+    return this.repo.count({
+      where: { userId: userId.value },
+    });
+  }
+
   async findPendingExpired(timeoutDate: Date): Promise<Transaction[]> {
     const orms = await this.repo.find({
       where: {
