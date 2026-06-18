@@ -4,13 +4,13 @@ import { PlanSeeder } from './plan.seeder';
 
 describe('PlanSeeder', () => {
   let planRepository: jest.Mocked<
-    Pick<Repository<PlanEntity>, 'findOne' | 'create' | 'save'>
+    Pick<Repository<PlanEntity>, 'count' | 'create' | 'save'>
   >;
   let seeder: PlanSeeder;
 
   beforeEach(() => {
     planRepository = {
-      findOne: jest.fn(),
+      count: jest.fn(),
       create: jest.fn((plan) => plan as PlanEntity),
       save: jest.fn(),
     };
@@ -20,12 +20,12 @@ describe('PlanSeeder', () => {
     );
   });
 
-  it('creates missing default plans on module init', async () => {
-    planRepository.findOne.mockResolvedValue(null);
+  it('creates default plans when the plan table is empty', async () => {
+    planRepository.count.mockResolvedValue(0);
 
     await seeder.onModuleInit();
 
-    expect(planRepository.findOne).toHaveBeenCalledTimes(3);
+    expect(planRepository.count).toHaveBeenCalledTimes(1);
     expect(planRepository.create).toHaveBeenCalledTimes(3);
     expect(planRepository.save).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -36,13 +36,12 @@ describe('PlanSeeder', () => {
     );
   });
 
-  it('does not create plans that already exist', async () => {
-    planRepository.findOne.mockResolvedValue({
-      id: 'existing-id',
-    } as PlanEntity);
+  it('does not create plans when the plan table already has data', async () => {
+    planRepository.count.mockResolvedValue(1);
 
     await seeder.onModuleInit();
 
+    expect(planRepository.count).toHaveBeenCalledTimes(1);
     expect(planRepository.create).not.toHaveBeenCalled();
     expect(planRepository.save).not.toHaveBeenCalled();
   });

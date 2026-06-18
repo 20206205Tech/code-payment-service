@@ -50,25 +50,25 @@ export class PlanSeeder implements OnModuleInit {
 
   private async seedInitialPlans(): Promise<void> {
     try {
-      const plansToCreate: PlanEntity[] = [];
+      const count = await this.planRepository.count();
 
-      for (const defaultPlan of DEFAULT_PLANS) {
-        const existingPlan = await this.planRepository.findOne({
-          where: [{ id: defaultPlan.id }, { name: defaultPlan.name }],
-        });
-
-        if (!existingPlan) {
-          plansToCreate.push(this.planRepository.create(defaultPlan));
-        }
-      }
-
-      if (plansToCreate.length === 0) {
-        this.logger.log('Default plans already exist. Skip plan seeding.');
+      if (count > 0) {
+        this.logger.log(
+          'Database đã có dữ liệu Plan. Bỏ qua quá trình Seeding.',
+        );
         return;
       }
 
-      await this.planRepository.save(plansToCreate);
-      this.logger.log(`Seeded ${plansToCreate.length} default plan(s).`);
+      this.logger.log(
+        'Không tìm thấy Plan nào. Bắt đầu tự động tạo 3 gói VIP mặc định...',
+      );
+
+      const defaultPlans = DEFAULT_PLANS.map((plan) =>
+        this.planRepository.create(plan),
+      );
+
+      await this.planRepository.save(defaultPlans);
+      this.logger.log('Đã tạo thành công 3 gói VIP mặc định.');
     } catch (error) {
       this.logger.error('Failed to seed default plans.', error);
     }
