@@ -14,7 +14,7 @@ const DEFAULT_PLANS: Array<
     name: 'VIP 1',
     features: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
     durationMonths: 1,
-    price: 100000,
+    price: 10000,
     isActive: true,
   },
   {
@@ -22,7 +22,7 @@ const DEFAULT_PLANS: Array<
     name: 'VIP 6',
     features: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
     durationMonths: 6,
-    price: 550000,
+    price: 60000,
     isActive: true,
   },
   {
@@ -30,7 +30,7 @@ const DEFAULT_PLANS: Array<
     name: 'VIP 12',
     features: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
     durationMonths: 12,
-    price: 1000000,
+    price: 120000,
     isActive: true,
   },
 ];
