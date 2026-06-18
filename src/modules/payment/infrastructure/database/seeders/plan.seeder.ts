@@ -12,7 +12,7 @@ const DEFAULT_PLANS: Array<
   {
     id: '11111111-1111-4111-8111-111111111111',
     name: 'VIP 1',
-    features: ['Su dung suy luan', 'Su dung voice', 'Xu ly tai lieu rieng'],
+    features: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
     durationMonths: 1,
     price: 100000,
     isActive: true,
@@ -20,7 +20,7 @@ const DEFAULT_PLANS: Array<
   {
     id: '22222222-2222-4222-8222-222222222222',
     name: 'VIP 6',
-    features: ['Su dung suy luan', 'Su dung voice', 'Xu ly tai lieu rieng'],
+    features: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
     durationMonths: 6,
     price: 550000,
     isActive: true,
@@ -28,7 +28,7 @@ const DEFAULT_PLANS: Array<
   {
     id: '33333333-3333-4333-8333-333333333333',
     name: 'VIP 12',
-    features: ['Su dung suy luan', 'Su dung voice', 'Xu ly tai lieu rieng'],
+    features: ['Sử dụng suy luận', 'Sử dụng voice', 'Xử lý tài liệu riêng'],
     durationMonths: 12,
     price: 1000000,
     isActive: true,
