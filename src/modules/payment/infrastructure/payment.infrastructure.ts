@@ -38,6 +38,8 @@ import { ZalopayGatewayService } from './payment/gateway/zalopay-gateway.service
 import { PaymentGatewaySelectorService } from './payment/payment-gateway-selector.service';
 import { SupabaseUserProfileService } from './services/supabase-user-profile.service';
 
+import { PlanSeeder } from './database/seeders/plan.seeder';
+
 const cronProviders: Provider[] = [
   OutboxArchiveCron,
   PlanCleanupCron,
@@ -127,6 +129,7 @@ export const PaymentInfrastructure = {
     { provide: USER_PROFILE_PORT, useClass: SupabaseUserProfileService },
     { provide: MESSAGE_BROKER_PORT, useClass: KafkaMessageBrokerAdapter },
     TelegramAlertService,
+    PlanSeeder,
     ...cronProviders,
   ] as Provider[],
 };
