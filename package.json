@@ -123,6 +123,7 @@
   "overrides": {
     "protobufjs": "^8.6.0",
     "js-yaml": "^4.1.2",
+    "multer": "2.2.0",
     "@opentelemetry/core": "^2.8.0"
   }
 }
