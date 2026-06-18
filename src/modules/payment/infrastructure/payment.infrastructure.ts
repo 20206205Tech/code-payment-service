@@ -129,6 +129,7 @@ export const PaymentInfrastructure = {
     { provide: USER_PROFILE_PORT, useClass: SupabaseUserProfileService },
     { provide: MESSAGE_BROKER_PORT, useClass: KafkaMessageBrokerAdapter },
     TelegramAlertService,
+    PlanSeeder,
     ...cronProviders,
   ] as Provider[],
 };
